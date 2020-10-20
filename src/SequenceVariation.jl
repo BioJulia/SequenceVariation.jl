@@ -1,5 +1,4 @@
-
-module t
+module SequenceVariation
 
 # TODO: Add functionality to move a Variation to a new reference
 # needs to be done with heavy checks to make sure the alignment of the two 
@@ -25,83 +24,70 @@ Call Variations
 using BioSequences
 using BioAlignments
 import BioAlignments: OP_START, OP_SEQ_MATCH, OP_SEQ_MISMATCH, OP_INSERT, OP_DELETE
+import BioSymbols: BioSymbol
 
-abstract type Variation end
+abstract type Edit end
 
-struct Substitution{T} <: Variation
-    alt::T
+struct Substitution{T <: BioSymbol} <: Edit
+    symbol::T
 end
 
-struct Deletion <: Variation
+struct Deletion <: Edit
     len::Int
 end
 
-struct Insertion{A} <: Variation
-    seq::LongSequence{A}
+struct Insertion{S <: BioSequence} <: Edit
+    seq::S
 end
 
 Base.:(==)(x::Insertion{A}, y::Insertion{A}) where A = x.seq == y.seq
 
-# Metadata (such as sequence identifier) is intentionally left out
-struct SeqVar{A <: Alphabet, V <: Variation}
-    ref::LongSequence{A}
+struct Diff{E <: Edit}
     pos::Int
-    var::V
-
-    function SeqVar{A, V}(ref::LongSequence{A}, pos::Int, var::V) where {A <: Alphabet, V <: Variation}
-        n = new(ref, pos, var)
-        checkvar(n)
-        return n
-    end
+    edit::E
 end
 
-function SeqVar{A}(ref::LongSequence{A}, pos::Int, var::Variation) where A
-    return SeqVar{A,typeof(var)}(ref, pos, var)
+struct Variant{S <: BioSequence, E <: Edit}
+    ref::S
+    diffs::Vector{Diff{E}}
 end
 
-function SeqVar(ref::LongSequence{A}, pos::Int, var::Variation) where A
-    return SeqVar{A, typeof(var)}(ref, pos, var)
+struct Variation{S <: BioSequence, E <: Edit}
+    ref::S
+    diff::Diff{E}
 end
 
-function checkvar(x::SeqVar{A, Deletion}) where A
-    checkbounds(x.ref, x.pos:x.pos + x.var.len - 1)
+###
+function check(v::Variation{S, <:Substitution{T}}) where {S, T}
+    T == eltype(S) || throw(TypeError(:check, "", eltype(S), T))
+    checkbounds(v.ref, v.diff.pos)
 end
 
-function checkvar(x::SeqVar{A, Substitution{T}}) where {A, T}
-    if T !== eltype(A)
-        throw(ArgumentError("Substitution type must be alphabet eltype"))
-    end
-    checkbounds(x.ref, x.pos)
+check(v::Variation{S, Deletion}) where S = checkbounds(v.ref, v.diff.pos:(v.diff.pos+v.diff.edit.len)-1)
+
+function check(v::Variation{S, <:Insertion}) where S
+    length(v.diff.edit.seq) > 0 || throw(ArgumentError("Insertions cannot be length 0"))
+    # We can have insertions at the very end, after the reference sequence
+    v.diff.pos == lastindex(v.ref) + 1 && return nothing
+    checkbounds(v.ref, v.diff.pos)
 end
 
-function checkvar(x::SeqVar{A, Insertion{A}}) where A
-    if length(x.var.seq) < 1
-        throw(ArgumentError("Insertions cannot be empty"))
-    end
-    if x.pos ∉ 1:lastindex(x.ref)+1
-        throw(BoundsError(x.ref, x.pos))
-    end
+Base.show(io::IO, x::Diff{<:Substitution}) = print(io, x.pos, x.edit.symbol)
+Base.show(io::IO, x::Diff{Deletion}) = print(io, 'Δ', x.pos, '-', x.pos + x.edit.len - 1)
+Base.show(io::IO, x::Diff{<:Insertion}) = print(io, x.pos, x.edit.seq)
+
+function Base.show(io::IO, x::Variant{S, <:Substitution}) where S
+    print(io, x.ref[x.diff.pos], x.diff.pos, x.diff.edit.symbol)
 end
 
-function Base.show(io::IO, x::SeqVar{A, Deletion}) where A
-    print(io, 'Δ', x.pos)
-    if x.var.len > 1
-        print(io, '-', x.pos + x.var.len - 1)
-    end
-end
+Base.show(io::IO, x::Variant{S, Deletion}) where S = show(io, x.diff)
+Base.show(io::IO, x::Variant{S, <:Insertion} where S) = show(io, x.diff)
 
-function Base.show(io::IO, x::SeqVar{A, <:Substitution}) where A
-    print(io, x.ref[x.pos], x.pos, x.var.alt)
-end
+Base.:(==)(x::T, y::T) where {T <: Variant} = (x.ref === y.ref) & (x.diff == y.diff)
 
-function Base.show(io::IO, x::SeqVar{A, Insertion{A}}) where A
-    print(io, x.pos, x.var.seq)
-end
+#################
 
-function Base.:(==)(x::T, y::T) where {T <: SeqVar}
-    return x.ref === y.ref && x.pos == y.pos && x.var == y.var
-end
-
+#=
 function variations(ref::S, refaln::S, seqaln::S) where {S <: BioSequence}
     aln = AlignedSequence(seqaln, refaln)
     return variations(ref, refaln, seqaln, aln.aln.anchors)
@@ -214,5 +200,7 @@ function reconstruct(v::Vector{<:SeqVar{A}}) where A
     oldpos, newpos = 1, 1
     for i in srt
 =#
+=#
 
-end
+
+end # module
