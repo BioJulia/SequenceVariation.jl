@@ -42,6 +42,12 @@ outside this struct.
 """
 Substitution
 
+function Base.parse(::Type{Substitution{S, T}}, s::AbstractString) where {S, T}
+    mat = match(r"^[A-Z]([0-9]+)([A-Z])$", strip(s))
+    symbol = T(first(mat[2]))
+    Diff(parse(UInt, mat[1]), Substitution{S, T}(symbol))
+end
+
 Base.eltype(::Type{<:Substitution{S, T}}) where {S, T} = T
 
 """
@@ -52,6 +58,14 @@ outside this struct
 """
 Deletion
 
+function Base.parse(::Type{T}, s::AbstractString) where {T <: Deletion}
+    mat = match(r"^Δ([0-9]+)-([0-9]+)$", strip(s))
+    start = parse(UInt, mat[1])
+    stop = parse(UInt, mat[2])
+    start ≤ stop || error("Indel cannot have negative range")
+    Diff(start, T(stop - start + 1))
+end
+
 """
     Insertion
 
@@ -59,6 +73,12 @@ Represents the insertion of a `T` into a sequence. The location of the insertion
 is stored outside the struct.
 """
 Insertion
+
+function Base.parse(::Type{<:Insertion{S}}, s::AbstractString) where S
+    mat = match(r"^([0-9]+)([A-Z]+)$", strip(s))
+    seq = S(mat[2])
+    Diff(parse(UInt, mat[1]), Insertion(seq))
+end
 
 function Insertion(s::BioSequence)
     length(s) == 0 && throw(ArgumentError("Insertions cannot be length 0"))
@@ -75,6 +95,17 @@ Represents an `Edit` og type `E` at a given position.
 struct Diff{S <: BioSequence, T <: BioSymbol}
     pos::UInt
     edit::Edit{S, T}
+end
+
+function Base.parse(::Type{Diff{S, T}}, s::AbstractString) where {S, T}
+    beginning = first(s)
+    if beginning == 'Δ'
+        parse(Deletion{S, T}, s)
+    elseif isnumeric(beginning)
+        parse(Insertion{S, T}, s)
+    else
+        parse(Substitution{S, T}, s)
+    end
 end
 
 """
