@@ -23,137 +23,234 @@ Call Variations
 
 using BioSequences
 using BioAlignments
-import BioAlignments: OP_START, OP_SEQ_MATCH, OP_SEQ_MISMATCH, OP_INSERT, OP_DELETE
 import BioSymbols: BioSymbol
+using SumTypes
 
 const ALN_MODEL = AffineGapScoreModel(BLOSUM62, gap_open=-12, gap_extend=-2)
 
-@sum_type Edit{S, T}
+@sum_type Edit{S, T} begin
     Substitution{S, T}(::T)
     Deletion{S, T}(::UInt)
     Insertion{S, T}(::S)
 end
 
 """
-    Edit
-
-Abstract type representing a type of nucleotide edit: Deletion, insertion or
-substitution.
-"""
-abstract type Edit end
-
-"""
-    Substitution{T <: BioSymbol} <: Edit
+    Substitution
 
 Represents the presence of a `T` at a given position. The position is stored
 outside this struct.
 """
-struct Substitution{T <: BioSymbol} <: Edit
-    symbol::T
-end
+Substitution
 
-Base.eltype(::Type{<:Substitution{T}}) where T = T
+Base.eltype(::Type{<:Substitution{S, T}}) where {S, T} = T
 
 """
-    Deletion <: Edit
+    Deletion
 
 Represents the deletion of N symbols. The location of the deletion is stored
 outside this struct
 """
-struct Deletion <: Edit
-    len::UInt
-end
+Deletion
 
 """
-    Insertion{S <: BioSequence} <: Edit
+    Insertion
 
 Represents the insertion of a `T` into a sequence. The location of the insertion
 is stored outside the struct.
 """
-struct Insertion{S <: BioSequence} <: Edit
-    seq::S
+Insertion
+
+function Insertion(s::BioSequence)
+    length(s) == 0 && throw(ArgumentError("Insertions cannot be length 0"))
+    Insertion{typeof(s), eltype(s)}(s)
 end
 
-Base.:(==)(x::Insertion{A}, y::Insertion{A}) where A = x.seq == y.seq
+Base.:(==)(x::Insertion, y::Insertion) = x.seq == y.seq
 
 """
     Diff{E <: Edit}
 
 Represents an `Edit` og type `E` at a given position.
 """
-struct Diff{E <: Edit}
+struct Diff{S <: BioSequence, T <: BioSymbol}
     pos::UInt
-    edit::E
+    edit::Edit{S, T}
 end
 
-Diff(pos::Integer, edit::Edit) = Diff{typeof(edit)}(pos, edit)
-
 """
-    Variant{S <: BioSequence, D <: Diff}
+    Variant{S <: BioSequence, T <: BioSymbol}
 
-Represents a series of diffs of type `D` against a reference of type `S`.
-See also `Variation`
+Represents a series of diffs of type `Diff{S, T}` against a reference of type `S`.
+See also `Variation`.
 """
-struct Variant{S <: BioSequence, D <: Diff}
+struct Variant{S <: BioSequence, T <: BioSymbol}
     ref::S
-    diffs::Vector{D}
+    diffs::Vector{Diff{S, T}}
 end
 
-#function Variant(ref::BioSequence, diffs::Vector{D}) where D <: Diff
-#    return Variant{typeof(ref), D}(ref, diffs)
-#end
-
-function Base.show(io::IO, ::MIME"text/plain", x::Variant{S,D}) where {S,D}
+function Base.show(io::IO, ::MIME"text/plain", x::Variant{S,T}) where {S,T}
     cols = displaysize(io)[2] - 3
     recur_io = IOContext(io, :SHOWN_SET => x.diffs)
     print(io, summary(x), ":")
     for i in x.diffs
-        v = Variation{S, typeof(i)}(x.ref, i)
+        v = Variation{S, eltype(S)}(x.ref, i)
         str = sprint(show, v, context=recur_io, sizehint=0)
         print(io, "\n  ", Base._truncate_at_width_or_chars(str, cols, "\r\n"))
     end
 end
 
-#Variant(s::BioSequence, v::Vector{<:Diff}) = Variant{typeof(s),eltype(v)}(s,v)
-
 """
-    Variation{S <: BioSequence, D <: Diff}
+    Variation{S <: BioSequence, T <: BioSymbol}
 
-Represent a single diff of type `D` is a sequence of type `S`. See also `Variant`
+Represent a single diff against a biosequence. See also `Variant`
 """
-struct Variation{S <: BioSequence, D <: Diff}
+struct Variation{S <: BioSequence, T <: BioSymbol}
     ref::S
-    diff::D
+    diff::Diff{S, T}
 end
 
-#Variation(ref::BioSequence, diff::Diff) = Variation{typeof(ref), typeof(diffs)}(ref, diff)
-
-function check(v::Variation{S, <:Substitution{T}}) where {S, T}
-    T == eltype(S) || throw(TypeError(:check, "", eltype(S), T))
-    checkbounds(v.ref, v.diff.pos)
+@case Edit function check((x,)::Substitution{S, T}) where {S, T}
+    (ref, pos) -> begin
+        eltype(ref) == T || throw(TypeError(:check, "", eltype(ref), T))
+        checkbounds(ref, pos)
+    end
 end
 
-check(v::Variation{S, Diff{Deletion}}) where S = checkbounds(v.ref, v.diff.pos:(v.diff.pos+v.diff.edit.len)-1)
-
-function check(v::Variation{S, <:Diff{<:Insertion}}) where S
-    length(v.diff.edit.seq) > 0 || throw(ArgumentError("Insertions cannot be length 0"))
-    # We can have insertions at the very end, after the reference sequence
-    v.diff.pos == lastindex(v.ref) + 1 && return nothing
-    checkbounds(v.ref, v.diff.pos)
+@case Edit function check((seq,)::Insertion{S, T}) where {S, T}
+    (ref, pos) -> begin
+        # We can have insertions at the very end, after the reference sequence
+        pos == lastindex(ref) + 1 && return nothing
+        checkbounds(ref, pos)
+    end
 end
 
-Base.show(io::IO, x::Diff{<:Substitution}) = print(io, x.pos, x.edit.symbol)
-Base.show(io::IO, x::Diff{Deletion}) = print(io, 'Δ', x.pos, '-', x.pos + x.edit.len - 1)
-Base.show(io::IO, x::Diff{<:Insertion}) = print(io, x.pos, x.edit.seq)
-
-function Base.show(io::IO, x::Variation{S, <:Diff{<:Substitution}}) where S
-    print(io, x.ref[x.diff.pos], x.diff.pos, x.diff.edit.symbol)
+@case Edit function check((len,)::Deletion{S, T}) where {S, T}
+    (ref, pos) -> begin
+        checkbounds(ref, pos:(pos+len)-1)
+    end
 end
 
-Base.show(io::IO, x::Variation{S, Diff{Deletion}}) where S = show(io, x.diff)
-Base.show(io::IO, x::Variation{S, <:Diff{<:Insertion}} where S) = show(io, x.diff)
+@assert SumTypes.iscomplete(check, Edit)
+
+function check(x::Variation)
+    check(x.diff.edit)(x.ref, x.diff.pos)
+end
+
+@case Edit _show((x,)::Substitution) = (io, pos) -> print(io, pos, x)
+@case Edit _show((len,)::Deletion) = (io, pos) -> print(io, 'Δ', pos, '-', pos + len - 1)
+@case Edit _show((seq,)::Insertion) = (io, pos) -> print(io, pos, seq)
+
+@assert SumTypes.iscomplete(_show, Edit)
+
+Base.show(io::IO, x::Diff) = _show(x.edit)(io, x.pos)
+
+function Base.show(io::IO, x::Variation)
+    if x.diff.edit.data isa Substitution
+        print(io, x.ref[x.diff.pos])
+    end
+    show(io, x.diff)
+end
 
 Base.:(==)(x::T, y::T) where {T <: Variation} = (x.ref === y.ref) & (x.diff == y.diff)
+
+function variant(seq::LongAminoAcidSeq, ref::LongAminoAcidSeq)
+    aln = pairalign(OverlapAlignment(), seq, ref, ALN_MODEL).aln
+    diffs = Diff{LongAminoAcidSeq, AminoAcid}[]
+    result = Variant(ref, diffs)
+    refpos = seqpos = 0
+    markpos = 0
+    n_gaps = n_ins = 0
+    insertion_buffer = AminoAcid[]
+    for (seqi, refi) in aln
+        isgap(refi) || (refpos += 1)
+        isgap(seqi) || (seqpos += 1)
+
+        # Check for deletions
+        if isgap(seqi)
+            iszero(seqpos) && continue # skip indels at start
+            iszero(n_gaps) && (markpos = refpos)
+            n_gaps += 1
+        else
+            if !iszero(n_gaps)
+                push!(diffs, Diff(UInt(markpos), Deletion{LongAminoAcidSeq, AminoAcid}(UInt(n_gaps))))
+                n_gaps = 0
+            end
+        end
+
+        # Check for insertions
+        if isgap(refi)
+            iszero(refpos) && continue # skip indels at start
+            iszero(n_ins) && (markpos = refpos + 1)
+            push!(insertion_buffer, seqi)
+            n_ins += 1
+        else
+            if !iszero(n_ins)
+                seq = LongAminoAcidSeq(insertion_buffer)
+                push!(diffs, Diff(UInt(markpos), Insertion(seq)))
+                empty!(insertion_buffer)
+                n_ins = 0
+            end
+        end
+
+        # Substitutions
+        if !isgap(refi) && !isgap(seqi) && seqi != refi
+            push!(diffs, Diff(UInt(refpos), Substitution{LongAminoAcidSeq, AminoAcid}(seqi)))
+        end
+    end
+    # At the end of the loop?
+    return result  
+end
+
+@case Edit lendiff((x,)::Substitution) = 0
+@case Edit lendiff((len,)::Deletion) = -(len % Int)
+@case Edit lendiff((seq,)::Insertion) = length(seq) % Int
+
+function reconstruct!(seq::S, x::Variant{S}) where S
+    sort!(x.diffs, by=y -> y.pos)
+    len = length(x.ref) + sum(diff -> lendiff(diff.edit), x.diffs)
+    resize!(seq, len % UInt)
+    refpos = seqpos = 1
+    for diff in x.diffs
+        while refpos < diff.pos
+            seq[seqpos] = x.ref[refpos]
+            refpos += 1
+            seqpos += 1
+        end
+        if diff.edit.data isa Substitution
+            seq[seqpos] = diff.edit.data._1
+            seqpos += 1
+            refpos += 1
+        elseif diff.edit.data isa Deletion
+            refpos += diff.edit.data._1
+        elseif diff.edit.data isa Insertion
+            for i in diff.edit.data._1
+                seq[seqpos] = i
+                seqpos += 1
+            end
+        end
+    end
+    while seqpos ≤ length(seq)
+        seq[seqpos] = x.ref[refpos]
+        refpos += 1
+        seqpos += 1
+    end
+    seq
+end
+
+"""
+    reconstruct(x::Variant{S})
+
+Reconstruct the sequence of type `S` that created the variant. It is assumed the
+variant is well-formed, e.g. no substitutions in deleted sequences, or
+deletions/insertions of the same area multiple times.
+"""
+reconstruct(x::Variant{S}) where S = reconstruct!(S(), x)
+
+export Substitution, Insertion, Deletion, Diff, Variant, Variation
+
+end # module
+
+#=
 
 function variations(ref::S, refaln::S, seqaln::S) where {S <: BioSequence}
     aln = AlignedSequence(seqaln, refaln)
@@ -179,27 +276,7 @@ function substitutions(ref::S, seq::S) where {S <: BioSequence}
 end
 
 
-function variant(ref::S, seq::S) where {S <: BioSequence}
-    aln = pairalign(GlobalAlignment(), seq, ref, ALN_MODEL).aln
-    diffs = Diff[]
-    result = Variant(ref, diffs)
-    refpos = 0
-    markpos = 0
-    n_gaps = n_ins = 0
-    for (seqi, refi) in aln
-        isgap(refi) || (refpos += 1)
-
-        # Check for deletions
-        if isgap(seqi)
-            iszero(n_gaps) && (markpos = refi)
-            n_gaps += 1
-        else
-            if !iszero(n_gaps)
-                push(diffs, Diff{Deletion}Deletion(n_gaps))
-            end
-            n_gaps = 0
-        end
-    end    
+ 
 #=
 function variations(ref::S, refaln::S, seqaln::S, anchors::Vector{AlignmentAnchor}) where {S <: BioSequence{A}} where A
     result = Variant(dna"TAG", Diff[])
@@ -349,3 +426,5 @@ export Diff,
     substitutions
 
 end # module
+
+=#
