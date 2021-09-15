@@ -7,6 +7,17 @@ the sequence
 
 * Given a `Variant` and a new reference, translate the variant to the new reference.
 
+* Given a mutation and a reference and a sequence, determine if the sequence has that
+mutation
+
+TODO now:
+* Play around with some NGS results rel. to picked reference.
+    * Is it easy to construct ref and variants? I.e. is API nice?
+    * Is it nice and easy to check if a mut is present?
+    *
+
+* Implement "reference switching".
+* Add tests
 """
 
 import BioSymbols: BioSymbol
@@ -20,8 +31,8 @@ import Automa.RegExp: @re_str
 
 struct Unsafe end
 
-const DEFAULT_AA_ALN_MODEL = AffineGapScoreModel(BLOSUM62, gap_open=-12, gap_extend=-2)
-const DEFAULT_DNA_ALN_MODEL = AffineGapScoreModel(EDNAFULL, gap_open=-12, gap_extend=-2)
+const DEFAULT_AA_ALN_MODEL = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-2)
+const DEFAULT_DNA_ALN_MODEL = AffineGapScoreModel(EDNAFULL, gap_open=-25, gap_extend=-2)
 model(::AminoAcidSeq) = DEFAULT_AA_ALN_MODEL
 model(::NucleotideSeq) = DEFAULT_DNA_ALN_MODEL
 
@@ -31,9 +42,10 @@ const CONTEXT = Automa.CodeGenContext(
     generator=:goto,
     checkbounds=false
 )
-=#
+
 
 const BYTES = Union{String, SubString{String}, Vector{UInt8}}
+=#
 
 """
     Substitution
@@ -45,6 +57,8 @@ struct Substitution{T <: BioSymbol}
     x::T
 end
 Substitution(x::BioSymbol) = Substitution{typeof(x)}(x)
+Base.:(==)(x::Substitution, y::Substitution) = x.x == y.x
+Base.hash(x::Substitution, h::UInt) = hash(Substitution, hash(x.x, h))
 
 """
     Deletion
@@ -62,6 +76,7 @@ struct Deletion
 end
 Deletion(x::Integer) = Deletion(convert(UInt, x))
 Base.length(x::Deletion) = Int(x.len)
+Base.hash(x::Deletion, h::UInt) = hash(Deletion, hash(x.len, h))
 
 """
     Insertion{S <: BioSequence}
@@ -79,6 +94,7 @@ struct Insertion{S <: BioSequence}
 end
 Insertion(s::BioSequence) = Insertion{typeof(s)}(s)
 Base.:(==)(x::Insertion, y::Insertion) = x.seq == y.seq
+Base.hash(x::Insertion, h::UInt) = hash(Insertion, hash(x.x, h))
 
 """
     Edit{S <: BioSequence, T <: BioSymbol}
@@ -90,6 +106,29 @@ If insertion: Insertion of length L b/w ref pos `pos:pos+1`
 struct Edit{S <: BioSequence, T <: BioSymbol}
     x::Union{Substitution{T}, Deletion, Insertion{S}}
     pos::UInt
+end
+Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
+Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
+
+Base.parse(::Type{Edit}, s::AbstractString) = parse(Edit, String(s))
+function Base.parse(::Type{<:Edit{Se, Sy}}, s::Union{String, SubString{String}}) where {Se, Sy}
+    # Either "Δ1-2", "11T" or "G16C"
+    if (m = match(r"^Δ(\d+)-(\d+)$", s); m) !== nothing
+        pos = parse(UInt, m[1])
+        stop = parse(UInt, m[2])
+        stop ≥ pos || throw(ArgumentError("Non-positive deletion length: \"" * s * "\""))
+        Edit{Se, Sy}(Deletion(stop - pos + 1), pos)
+    elseif (m = match(r"^(\d+)([A-Za-z]+)$", s); m) !== nothing
+        pos = parse(UInt, m[1])
+        seq = Se(m[2])
+        Edit{Se, Sy}(Insertion(seq), pos)
+    elseif (m = match(r"^[A-Za-z](\d+)([A-Za-z])$", s); m) !== nothing
+        pos = parse(UInt, m[1])
+        sym = Sy(first(m[2]))
+        Edit{Se, Sy}(Substitution(sym), pos)
+    else
+        throw(ArgumentError("Failed to parse edit \"" * s * '"'))
+    end
 end
 
 #=
@@ -154,10 +193,22 @@ function Variant(ref::S, edits::Vector{Edit{S, T}}) where {S<:BioSequence, T<:Bi
     Variant{S, T}(ref, edits)
 end
 
+function Base.show(io::IO, x::Variant)
+    n = length(x.edits)
+    print(io, summary(x), " with $n edit$(n > 1 ? "s" : ""):")
+    for i in x.edits
+        v = Variation(x.ref, i)
+        print(io, "\n  ")
+        show(io, v)
+    end
+end
+
+
 # Validate:
 # A sequence is invalid if any of its operations are out of bounds, or the same position
 # is affected by multiple edits.
 function is_valid(v::Variant)
+    isempty(v.ref) && return false
     valid_positions = 1:length(v.ref)
     last_was_insert = false
     for edit in v.edits
@@ -172,7 +223,7 @@ function is_valid(v::Variant)
         # for next op. However, we cannot have two insertions at the same position, because
         # then the order of them is ambiguous
         elseif op isa Insertion
-            pos in (first(valid_positions)+last_was_insert:last(valid_positions)) || return false
+            pos in (first(valid_positions)-1+last_was_insert:last(valid_positions)) || return false
             last_was_insert = true
         # Deletions obviously invalidate the reference bases that are deleted.
         elseif op isa Deletion
@@ -185,48 +236,11 @@ function is_valid(v::Variant)
     return true
 end
 
-#=
-# Substituion can only occur in 1:len
-# Deletions of len L only in 1:(len-L)+1
-# Insertions at 1:len+1
-"If a Variant passes this validation, then it should be possible to unambiguously
-reconstruct the variant."
-function validate(v::Variant)
-    len = length(v.ref)
-    sort!(v.edits, by=x -> x.pos)
-    lower = 1
-
-    # No not allow two inserts right after each other at same pos, because then it's
-    # ambiguous which to pick first.
-    last_was_insert = false
-    for edit in v.edits
-        editx = edit.x
-        pos = edit.pos
-        if editx isa Substitution
-            (pos < lower || pos > len) && error()
-            lower = pos + 1
-            last_was_insert = false
-        elseif editx isa Deletion
-            (pos < lower || pos > (len - editx.len + 1)) && error()
-            lower = pos + editx.len
-            last_was_insert = false
-        else # Insertion
-            (pos < lower + last_was_insert || pos > len + 1) && error()
-            lower = pos
-            last_was_insert = true
-        end
-    end
-    return v
-end
-=#
-
-# TODO: We NEED to include diffs at ends. Yes, they may not be proper mutations
-# but we need it to reconstruct the actual seqs
-function variant(seq::T, ref::T) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
-    return variant(pairalign(OverlapAlignment(), seq, ref, model(seq)).aln)
+function Variant(seq::T, ref::T) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
+    return Variant(pairalign(OverlapAlignment(), seq, ref, model(seq)).aln)
 end
 
-function variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
+function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
     ref = aln.b
     E = eltype(typeof(ref))
     edits = Edit{T, E}[]
@@ -243,11 +257,9 @@ function variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
         if isgap(seqi)
             iszero(n_gaps) && (markpos = refpos)
             n_gaps += 1
-        else
-            if !iszero(n_gaps)
-                push!(edits, Edit{T, E}(Deletion(UInt(n_gaps)), UInt(markpos)))
-                n_gaps = 0
-            end
+        elseif !iszero(n_gaps)
+            push!(edits, Edit{T, E}(Deletion(UInt(n_gaps)), UInt(markpos)))
+            n_gaps = 0
         end
 
         # Check for insertions
@@ -255,13 +267,11 @@ function variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
             iszero(n_ins) && (markpos = refpos + 1)
             push!(insertion_buffer, seqi)
             n_ins += 1
-        else
-            if !iszero(n_ins)
-                seq = T(insertion_buffer)
-                push!(edits, Edit{T, E}(Insertion(seq), UInt(markpos)))
-                empty!(insertion_buffer)
-                n_ins = 0
-            end
+        elseif !iszero(n_ins)
+            seq = T(insertion_buffer)
+            push!(edits, Edit{T, E}(Insertion(seq), UInt(markpos)))
+            empty!(insertion_buffer)
+            n_ins = 0
         end
 
         # Substitutions
@@ -320,6 +330,42 @@ end
 struct Variation{S <: BioSequence, T <: BioSymbol}
     ref::S
     edit::Edit{S, T}
+
+    function Variation{S, T}(ref::S, e::Edit{S, T}, ::Unsafe) where {S <: BioSequence, T <: BioSymbol}
+        new(ref, e)
+    end
+end
+
+function Variation{S, T}(ref::S, e::Edit{S, T}) where {S <: BioSequence, T <: BioSymbol}
+    v = Variation{S, T}(ref, e, Unsafe())
+    is_valid(v) ? v : throw(ArgumentError("Invalid variant"))
+end
+
+Variation(ref::S, edit::Edit{S, T}) where {S, T} = Variation{S, T}(ref, edit)
+
+function is_valid(v::Variation)
+    isempty(v.ref) && return false
+    op = v.edit.x
+    pos = v.edit.pos
+    if op isa Substitution
+        return pos in eachindex(v.ref)
+    elseif op isa Insertion
+        return pos in 0:lastindex(v.ref)
+    elseif op isa Deletion
+        return pos in 1:(lastindex(v.ref)-length(op) + 1)
+    end
+end
+
+function Base.show(io::IO, x::Variation)
+    content = x.edit.x
+    pos = x.edit.pos
+    if content isa Substitution
+        print(io, x.ref[pos], pos, content.x)
+    elseif content isa Deletion
+        print(io, 'Δ', pos, '-', pos + content.len - 1)
+    else
+        print(io, pos, content.x)
+    end
 end
 
 function Base.in(v::Variation, var::Variant)
@@ -333,5 +379,11 @@ end
 function hasvariation(seq::S, var::Variation{S, T}) where {S, T}
     var in variant(seq, var.ref)
 end
+
+export Insertion,
+    Deletion,
+    Substitution,
+    Variant,
+    Variation
 
 end # module
