@@ -20,9 +20,12 @@ TODO now:
 * Add tests
 """
 
-import BioSymbols: BioSymbol
-using BioAlignments
-using BioSequences
+using BioSymbols: BioSymbol
+using BioAlignments: BioAlignments, PairwiseAlignment
+using BioSequences: BioSequences, BioSequence, NucleotideSeq, AminoAcidSeq, LongSequence, isgap
+
+const BA = BioAlignments
+const BS = BioSequences
 
 #=
 import Automa
@@ -30,11 +33,7 @@ import Automa.RegExp: @re_str
 =#
 
 struct Unsafe end
-
-const DEFAULT_AA_ALN_MODEL = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-2)
-const DEFAULT_DNA_ALN_MODEL = AffineGapScoreModel(EDNAFULL, gap_open=-25, gap_extend=-2)
-model(::AminoAcidSeq) = DEFAULT_AA_ALN_MODEL
-model(::NucleotideSeq) = DEFAULT_DNA_ALN_MODEL
+struct Inapplicable end
 
 #=
 const CONTEXT = Automa.CodeGenContext(
@@ -56,7 +55,6 @@ outside this struct.
 struct Substitution{T <: BioSymbol}
     x::T
 end
-Substitution(x::BioSymbol) = Substitution{typeof(x)}(x)
 Base.:(==)(x::Substitution, y::Substitution) = x.x == y.x
 Base.hash(x::Substitution, h::UInt) = hash(Substitution, hash(x.x, h))
 
@@ -85,7 +83,7 @@ Represents the insertion of a `S` into a sequence. The location of the insertion
 is stored outside the struct.
 """
 struct Insertion{S <: BioSequence}
-    x::S
+    seq::S
 
     function Insertion{S}(x::S) where {S <: BioSequence}
         isempty(x) && error("Insertion must be at least 1 symbol")
@@ -93,8 +91,9 @@ struct Insertion{S <: BioSequence}
     end
 end
 Insertion(s::BioSequence) = Insertion{typeof(s)}(s)
+Base.length(x::Insertion) = length(x.seq)
 Base.:(==)(x::Insertion, y::Insertion) = x.seq == y.seq
-Base.hash(x::Insertion, h::UInt) = hash(Insertion, hash(x.x, h))
+Base.hash(x::Insertion, h::UInt) = hash(Insertion, hash(x.seq, h))
 
 """
     Edit{S <: BioSequence, T <: BioSymbol}
@@ -110,7 +109,10 @@ end
 Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
 Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
 
-Base.parse(::Type{Edit}, s::AbstractString) = parse(Edit, String(s))
+function Base.parse(::Type{T}, s::AbstractString) where {T <: Edit{Se, Sy}}  where {Se, Sy}
+    parse(T, String(s))
+end
+
 function Base.parse(::Type{<:Edit{Se, Sy}}, s::Union{String, SubString{String}}) where {Se, Sy}
     # Either "Δ1-2", "11T" or "G16C"
     if (m = match(r"^Δ(\d+)-(\d+)$", s); m) !== nothing
@@ -203,7 +205,6 @@ function Base.show(io::IO, x::Variant)
     end
 end
 
-
 # Validate:
 # A sequence is invalid if any of its operations are out of bounds, or the same position
 # is affected by multiple edits.
@@ -236,11 +237,7 @@ function is_valid(v::Variant)
     return true
 end
 
-function Variant(seq::T, ref::T) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
-    return Variant(pairalign(OverlapAlignment(), seq, ref, model(seq)).aln)
-end
-
-function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{AminoAcidAlphabet, NucleicAcidAlphabet}}}
+function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{BS.AminoAcidAlphabet, BS.NucleicAcidAlphabet}}}
     ref = aln.b
     E = eltype(typeof(ref))
     edits = Edit{T, E}[]
@@ -375,9 +372,51 @@ function Base.in(v::Variation, var::Variant)
     any(v.edit == edit for edit in var.edits)
 end
 
-# How to check if a Variation is present in a sequence?
-function hasvariation(seq::S, var::Variation{S, T}) where {S, T}
-    var in variant(seq, var.ref)
+function translate(var::Variation{S, T}, aln::PairwiseAlignment{S, S}) where {S, T}
+    kind = var.edit.x
+    pos = var.edit.pos
+    seq, ref = aln.seq, aln.b
+
+    # Special case: Insertions may have a pos of 0, which cannot be mapped to
+    # the seq using ref2seq
+    if iszero(pos)
+        (s, r), _ = iterate(aln)
+        (isgap(s) | isgap(r)) && return Inapplicable()
+        return Variation{S, T}(seq, Edit{S, T}(Insertion(var.edit.x), 0))
+    end
+    
+    (seqpos, op) = BA.ref2seq(aln, pos)
+    if kind isa Substitution
+        # If it's a substitution, return nothing if it maps to a deleted
+        # position, or substitutes to same base.
+        op in (BA.OP_MATCH, BA.OP_SEQ_MATCH, BA.OP_SEQ_MISMATCH) || return nothing
+        seq[seqpos] == kind.x && return nothing
+        edit = Edit{S, T}(kind, seqpos)
+        return Variation{S, T}(seq, edit, Unsafe())
+    elseif kind isa Deletion
+        # If it's a deletion, return nothing if the deleted part is already missing
+        # from the new reference.
+        (stop, op2) = BA.ref2seq(aln, pos + length(kind) - 1)
+        start = seqpos + op == BA.OP_DELETE
+        start < stop && return nothing
+        edit = Edit{S, T}(Deletion(stop - start + 1), start)
+        return Variation{S, T}(seq, edit, Unsafe())
+    else
+        # If it maps directly to a symbol, just insert
+        if op in (BA.OP_MATCH, BA.OP_SEQ_MATCH, BA.OP_SEQ_MISMATCH)
+            # This happens if there is already an insertion at the position
+            if pos != lastindex(ref) && first(ref2seq(aln, pos+1)) != seqpos + 1
+                return Inapplicable()
+            else
+                edit = Edit{S, T}(Insertion(var.edit.x), seqpos)
+                return Variation{S, T}(seq, edit, Unsafe())
+            end
+        # Alternatively, it can map to a deletion. In that case, it become really
+        # tricky to talk about the "same" insertion.
+        else
+            return Inapplicable()
+        end
+    end    
 end
 
 export Insertion,
