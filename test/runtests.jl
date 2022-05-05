@@ -33,3 +33,14 @@ align(a::BioSequence, b::BioSequence) = pairalign(GlobalAlignment(), a, b, DNA_M
 seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
 seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
 var = Variant(align(seq1, seq2))
+
+@testset "VariationPosition" begin
+    refseq = dna"ACAACTTTATCT"
+    mutseq = dna"ACATCTTTATCT"
+
+    read01 = AlignedSequence(mutseq[1:10], Alignment("10M", 1, 1))
+    read02 = AlignedSequence(mutseq[3:12], Alignment("10M", 1, 3))
+    aln01 = PairwiseAlignment(read01, refseq)
+    aln02 = PairwiseAlignment(read02, refseq)
+    @test Variant(aln01).edits == Variant(aln02).edits
+end
