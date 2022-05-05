@@ -66,7 +66,7 @@ outside this struct
 """
 struct Deletion
     len::UInt
-    
+
     function Deletion(len::UInt)
         iszero(len) && error("Deletion must be at least 1 symbol")
         new(len)
@@ -156,7 +156,7 @@ let
                 lastsymbol = symbol
             end
         end,
-        :digit => :(num = UInt(10)*num + (byte - 0x30) % UInt),        
+        :digit => :(num = UInt(10)*num + (byte - 0x30) % UInt),
     )
     @eval begin
         function Base.parse(::Type{Edit{S, T}}, data::BYTES) where {S, T}
@@ -180,7 +180,7 @@ end
 struct Variant{S <: BioSequence, T <: BioSymbol}
     ref::S
     edits::Vector{Edit{S, T}}
-    
+
     Variant{S, T}(ref::S, edits::Vector{Edit{S, T}}, ::Unsafe) where {S, T} = new(ref, edits)
 end
 
@@ -242,7 +242,8 @@ function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
     E = eltype(typeof(ref))
     edits = Edit{T, E}[]
     result = Variant(ref, edits)
-    refpos = seqpos = 0
+    refpos = first(aln.a.aln.anchors).refpos
+    seqpos = first(aln.a.aln.anchors).seqpos
     markpos = 0
     n_gaps = n_ins = 0
     insertion_buffer = E[]
@@ -384,7 +385,7 @@ function translate(var::Variation{S, T}, aln::PairwiseAlignment{S, S}) where {S,
         (isgap(s) | isgap(r)) && return Inapplicable()
         return Variation{S, T}(seq, Edit{S, T}(Insertion(var.edit.x), 0))
     end
-    
+
     (seqpos, op) = BA.ref2seq(aln, pos)
     if kind isa Substitution
         # If it's a substitution, return nothing if it maps to a deleted
@@ -416,7 +417,7 @@ function translate(var::Variation{S, T}, aln::PairwiseAlignment{S, S}) where {S,
         else
             return Inapplicable()
         end
-    end    
+    end
 end
 
 export Insertion,
