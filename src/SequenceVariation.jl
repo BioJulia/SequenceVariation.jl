@@ -20,9 +20,10 @@ TODO now:
 * Add tests
 """
 
-using BioSymbols: BioSymbol
 using BioAlignments: BioAlignments, PairwiseAlignment
+using BioGenerics: BioGenerics, leftposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, AminoAcidSeq, LongSequence, isgap
+using BioSymbols: BioSymbol
 
 const BA = BioAlignments
 const BS = BioSequences
@@ -351,6 +352,11 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
     return Variation{S,T}(ref, e)
 end
 
+reference(v::Variation) = v.reference
+edit(v::Variation) = v.edit
+mutation(v::Variation) = mutation(edit(v))
+BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
+
 function is_valid(v::Variation)
     isempty(v.ref) && return false
     op = v.edit.x
@@ -436,6 +442,8 @@ export Insertion,
     Deletion,
     Substitution,
     Variant,
-    Variation
+    Variation,
+    reference,
+    mutation
 
 end # module
