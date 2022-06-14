@@ -133,6 +133,9 @@ function Base.parse(::Type{<:Edit{Se, Sy}}, s::Union{String, SubString{String}})
     end
 end
 
+mutation(e::Edit) = e.x
+BioGenerics.leftposition(e::Edit) = e.pos
+
 #=
 @noinline throw_parse_error(T, p::Integer) = error("Failed to parse $T at byte $p")
 
