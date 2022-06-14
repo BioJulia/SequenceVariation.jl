@@ -341,6 +341,13 @@ end
 
 Variation(ref::S, edit::Edit{S, T}) where {S, T} = Variation{S, T}(ref, edit)
 
+function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
+    T = eltype(ref)
+
+    e = parse(Edit{S,T}, edit)
+    return Variation{S,T}(ref, e)
+end
+
 function is_valid(v::Variation)
     isempty(v.ref) && return false
     op = v.edit.x
