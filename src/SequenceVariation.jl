@@ -304,6 +304,9 @@ function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
     return result
 end
 
+edits(v::Variant) = v.edits
+reference(v::Variant) = v.ref
+
 function lendiff(edit::Edit)
     x = edit.x
     x isa Substitution ? 0 : (x isa Deletion ? -length(x) : length(x.x))
