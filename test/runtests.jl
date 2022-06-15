@@ -57,3 +57,15 @@ end
     @test mutation(del) isa Deletion
     @test mutation(ins) isa Insertion
 end
+
+@testset "VariationRetrieval" begin
+    refseq = dna"ACAACTTTATCT"
+    mutseq = dna"ACATCTTTATCT"
+
+    read = AlignedSequence(mutseq[1:10], Alignment("10M", 1, 1))
+    aln = PairwiseAlignment(read, refseq)
+    var = Variant(aln)
+
+    sub = Variation(refseq, "A4T")
+    @test first(variations(var)) == sub
+end
