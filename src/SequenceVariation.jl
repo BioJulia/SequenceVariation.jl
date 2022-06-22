@@ -21,7 +21,7 @@ TODO now:
 """
 
 using BioAlignments: BioAlignments, PairwiseAlignment
-using BioGenerics: BioGenerics, leftposition
+using BioGenerics: BioGenerics, leftposition, rightposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, AminoAcidSeq, LongSequence, isgap
 using BioSymbols: BioSymbol
 
@@ -109,6 +109,7 @@ struct Edit{S <: BioSequence, T <: BioSymbol}
 end
 Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
 Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
+Base.length(e::Edit) = e isa Substitution ? 1 : length(mutation(e))
 
 function Base.parse(::Type{T}, s::AbstractString) where {T <: Edit{Se, Sy}}  where {Se, Sy}
     parse(T, String(s))
@@ -136,6 +137,17 @@ end
 
 mutation(e::Edit) = e.x
 BioGenerics.leftposition(e::Edit) = e.pos
+function BioGenerics.rightposition(e::Edit)
+    if mutation(e) isa Substitution
+        return leftposition(e)
+    elseif mutation(e) isa Insertion
+        return leftposition(e) + 1
+    elseif mutation(e) isa Deletion
+        return leftposition(e) + length(e) - 1
+    else
+        error("Unknown mutation type $(typeof(mutation(e)))")
+    end
+end
 
 #=
 @noinline throw_parse_error(T, p::Integer) = error("Failed to parse $T at byte $p")
@@ -356,6 +368,7 @@ reference(v::Variation) = v.reference
 edit(v::Variation) = v.edit
 mutation(v::Variation) = mutation(edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
+BioGenerics.rightposition(v::Variation) = rightposition(edit(v))
 Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
 Base.hash(x::Variation, h::UInt) = hash(Variation, hash((x.ref, x.edit), h))
 
