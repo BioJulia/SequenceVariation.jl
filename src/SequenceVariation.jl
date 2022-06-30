@@ -20,9 +20,10 @@ TODO now:
 * Add tests
 """
 
-using BioSymbols: BioSymbol
 using BioAlignments: BioAlignments, PairwiseAlignment
+using BioGenerics: BioGenerics, leftposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, AminoAcidSeq, LongSequence, isgap
+using BioSymbols: BioSymbol
 
 const BA = BioAlignments
 const BS = BioSequences
@@ -132,6 +133,9 @@ function Base.parse(::Type{<:Edit{Se, Sy}}, s::Union{String, SubString{String}})
         throw(ArgumentError("Failed to parse edit \"" * s * '"'))
     end
 end
+
+mutation(e::Edit) = e.x
+BioGenerics.leftposition(e::Edit) = e.pos
 
 #=
 @noinline throw_parse_error(T, p::Integer) = error("Failed to parse $T at byte $p")
@@ -341,6 +345,18 @@ end
 
 Variation(ref::S, edit::Edit{S, T}) where {S, T} = Variation{S, T}(ref, edit)
 
+function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
+    T = eltype(ref)
+
+    e = parse(Edit{S,T}, edit)
+    return Variation{S,T}(ref, e)
+end
+
+reference(v::Variation) = v.reference
+edit(v::Variation) = v.edit
+mutation(v::Variation) = mutation(edit(v))
+BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
+
 function is_valid(v::Variation)
     isempty(v.ref) && return false
     op = v.edit.x
@@ -426,6 +442,8 @@ export Insertion,
     Deletion,
     Substitution,
     Variant,
-    Variation
+    Variation,
+    reference,
+    mutation
 
 end # module

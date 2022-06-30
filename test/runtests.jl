@@ -23,9 +23,10 @@ TODO now:
 * Add tests
 """
 
-using BioSequences
 using BioAlignments
+using BioSequences
 using SequenceVariation
+using Test
 
 const DNA_MODEL = BioAlignments.AffineGapScoreModel(EDNAFULL, gap_open=-25, gap_extend=-2)
 
@@ -43,4 +44,16 @@ var = Variant(align(seq1, seq2))
     aln01 = PairwiseAlignment(read01, refseq)
     aln02 = PairwiseAlignment(read02, refseq)
     @test Variant(aln01).edits == Variant(aln02).edits
+end
+
+@testset "VariationParsing" begin
+    refseq = dna"ACAACTTTATCT"
+
+    sub = Variation(refseq, "A4T")
+    del = Variation(refseq, "Δ4-5")
+    ins = Variation(refseq, "4TT")
+
+    @test mutation(sub) isa Substitution
+    @test mutation(del) isa Deletion
+    @test mutation(ins) isa Insertion
 end
