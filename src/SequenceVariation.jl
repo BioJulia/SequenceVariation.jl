@@ -356,6 +356,8 @@ reference(v::Variation) = v.reference
 edit(v::Variation) = v.edit
 mutation(v::Variation) = mutation(edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
+Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
+Base.hash(x::Variation, h::UInt) = hash(Variation, hash((x.ref, x.edit), h))
 
 function is_valid(v::Variation)
     isempty(v.ref) && return false
