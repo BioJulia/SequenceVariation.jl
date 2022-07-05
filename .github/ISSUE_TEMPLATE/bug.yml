@@ -1,0 +1,59 @@
+name: Bug
+description: Bug report
+
+body:
+
+  - type: markdown
+    attributes:
+      value: "> _This template is rather extensive. Fill out all that you can, if are a new contributor or you're unsure about any section, leave it unchanged and a reviewer will help you_ :smile:."
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected behavior
+      description: Tell us what you expect to happen
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Current behavior
+      description: Tell us what happens instead of the expected behavior
+
+  - type: textarea
+    attributes:
+      label: Possible solution
+      description: Suggest a fix/reason for the bug (optional)
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to reproduce
+      description: You may include copy-pasteable snippets or a list of steps to reproduce the bug
+
+  - type: textarea
+    attributes:
+      label: Context
+      description: How has this issue affected you? What are you trying to accomplish? Providing context helps us come up with a solution that is most useful in the real world.
+
+  - type: input
+    attributes:
+      label: Package version used
+
+  - type: input
+    attributes:
+      label: Julia version used
+
+  - type: input
+    attributes:
+      label: Operating system and version
+
+  - type: input
+    attributes:
+      label: Link to your project
+
+  - type: textarea
+    attributes:
+      label: Please list installed packages here
