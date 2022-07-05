@@ -1,15 +1,22 @@
+using Pkg
 using Documenter
 using SequenceVariation
 
-makedocs(
-    sitename = "SequenceVariation",
+makedocs(;
+    checkdocs = :exports,
+    linkcheck = true,
+    sitename = "SequenceVariation.jl",
     format = Documenter.HTML(),
-    modules = [SequenceVariation]
+    modules = [SequenceVariation],
+    pages = [
+        "Home" => "index.md",
+        "API Reference" => "api.md",
+    ],
+    authors = replace(join(Pkg.TOML.parsefile("Project.toml")["authors"], ", "), r" <.*?>" => "" ) * ", The BioJulia Organisation, and other contributors."
 )
 
-# Documenter can also automatically deploy documentation to gh-pages.
-# See "Hosting Documentation" and deploydocs() in the Documenter manual
-# for more information.
-#=deploydocs(
-    repo = "<repository url>"
-)=#
+deploydocs(
+    repo = "github.com/BioJulia/SequenceVariation.jl.git",
+    devbranch = "master",
+    push_preview = true,
+)
