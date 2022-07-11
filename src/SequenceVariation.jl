@@ -367,7 +367,7 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
     return Variation{S,T}(ref, e)
 end
 
-reference(v::Variation) = v.reference
+reference(v::Variation) = v.ref
 edit(v::Variation) = v.edit
 mutation(v::Variation) = mutation(edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
