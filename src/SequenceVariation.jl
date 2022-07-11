@@ -504,6 +504,10 @@ function refbases(v::Variation)
     return _refbases(mutation(v), reference(v), leftposition(v))
 end
 
+function altbases(v::Variation)
+    return _altbases(mutation(v), reference(v), leftposition(v))
+end
+
 export Insertion,
     Deletion,
     Substitution,
@@ -512,6 +516,7 @@ export Insertion,
     reference,
     mutation,
     variations,
-    refbases
+    refbases,
+    altbases
 
 end # module
