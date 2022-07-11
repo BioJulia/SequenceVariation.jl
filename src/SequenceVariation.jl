@@ -464,6 +464,10 @@ function variations(v::Variant)
     return vs
 end
 
+function _refbases(s::Substitution, reference::S, pos::UInt) where S <: BioSequence
+    return S([reference[pos]])
+end
+
 export Insertion,
     Deletion,
     Substitution,
