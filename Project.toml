@@ -1,6 +1,6 @@
 name = "SequenceVariation"
 uuid = "eef6e190-9969-4f06-a38f-35a110a8fdc8"
-authors = ["Jakob Nybo Nissen <jakobnybonissen@gmail.com>"]
+authors = ["Jakob Nybo Nissen <jakobnybonissen@gmail.com>", "Thomas A. Christensen II <25492070+MillironX@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
