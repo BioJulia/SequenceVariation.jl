@@ -8,5 +8,5 @@ end
 # API Reference
 
 ```@autodocs
-Modules = SequenceVariation
+Modules = [SequenceVariation]
 ```
