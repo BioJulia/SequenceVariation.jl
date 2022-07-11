@@ -488,6 +488,10 @@ function _altbases(d::Deletion, reference::S, pos::UInt) where S <: BioSequence
     end
 end
 
+function _refbases(i::Insertion, reference::S, pos::UInt) where S <: BioSequence
+    return S([reference[pos]])
+end
+
 export Insertion,
     Deletion,
     Substitution,
