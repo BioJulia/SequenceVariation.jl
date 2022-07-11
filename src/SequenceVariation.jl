@@ -472,6 +472,14 @@ function _altbases(s::Substitution, reference::S, pos::UInt) where S <: BioSeque
     return S([s.x])
 end
 
+function _refbases(d::Deletion, reference::S, pos::UInt) where S <: BioSequence
+    if pos == 1
+        return S(reference[UnitRange{Int}(pos, pos+length(d))])
+    else
+        return S(reference[UnitRange{Int}(pos-1, pos+length(d)-1)])
+    end
+end
+
 export Insertion,
     Deletion,
     Substitution,
