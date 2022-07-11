@@ -500,6 +500,10 @@ function _altbases(i::Insertion, reference::S, pos::UInt) where S <: BioSequence
     end
 end
 
+function refbases(v::Variation)
+    return _refbases(mutation(v), reference(v), leftposition(v))
+end
+
 export Insertion,
     Deletion,
     Substitution,
@@ -507,6 +511,7 @@ export Insertion,
     Variation,
     reference,
     mutation,
-    variations
+    variations,
+    refbases
 
 end # module
