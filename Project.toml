@@ -1,6 +1,6 @@
 name = "SequenceVariation"
 uuid = "eef6e190-9969-4f06-a38f-35a110a8fdc8"
-authors = ["Jakob Nybo Nissen <jakobnybonissen@gmail.com>"]
+authors = ["Jakob Nybo Nissen <jakobnybonissen@gmail.com>", "Thomas A. Christensen II <25492070+MillironX@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
@@ -8,6 +8,13 @@ BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"
 BioGenerics = "47718e42-2ac5-11e9-14af-e5595289c2ea"
 BioSequences = "7e6ae17a-c86d-528c-b3b9-7f778a29fe59"
 BioSymbols = "3c28c6f8-a34d-59c4-9654-267d177fcfa9"
+
+[compat]
+BioAlignments = "2.0.0"
+BioGenerics = "0.1"
+BioSequences = "2"
+BioSymbols = "4"
+julia = "1.6"
 
 [extras]
 BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"
