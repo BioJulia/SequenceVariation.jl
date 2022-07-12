@@ -13,7 +13,7 @@ BioSymbols = "3c28c6f8-a34d-59c4-9654-267d177fcfa9"
 BioAlignments = "2.0.0"
 BioGenerics = "0.1"
 BioSequences = "2"
-BioSymbols = "4"
+BioSymbols = "4, 5"
 julia = "1.6"
 
 [extras]
