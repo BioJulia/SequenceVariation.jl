@@ -367,7 +367,7 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
     return Variation{S,T}(ref, e)
 end
 
-reference(v::Variation) = v.reference
+reference(v::Variation) = v.ref
 edit(v::Variation) = v.edit
 mutation(v::Variation) = mutation(edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
@@ -464,6 +464,50 @@ function variations(v::Variant)
     return vs
 end
 
+function _refbases(s::Substitution, reference::S, pos::UInt) where S <: BioSequence
+    return S([reference[pos]])
+end
+
+function _altbases(s::Substitution, reference::S, pos::UInt) where S <: BioSequence
+    return S([s.x])
+end
+
+function _refbases(d::Deletion, reference::S, pos::UInt) where S <: BioSequence
+    if pos == 1
+        return S(reference[UnitRange{Int}(pos, pos+length(d))])
+    else
+        return S(reference[UnitRange{Int}(pos-1, pos+length(d)-1)])
+    end
+end
+
+function _altbases(d::Deletion, reference::S, pos::UInt) where S <: BioSequence
+    if pos == 1
+        return S([reference[pos+1]])
+    else
+        return S([reference[pos-1]])
+    end
+end
+
+function _refbases(i::Insertion, reference::S, pos::UInt) where S <: BioSequence
+    return S([reference[pos]])
+end
+
+function _altbases(i::Insertion, reference::S, pos::UInt) where S <: BioSequence
+    if pos == 1
+        return S([i.seq..., reference[pos]])
+    else
+        return S([reference[pos], i.seq...])
+    end
+end
+
+function refbases(v::Variation)
+    return _refbases(mutation(v), reference(v), leftposition(v))
+end
+
+function altbases(v::Variation)
+    return _altbases(mutation(v), reference(v), leftposition(v))
+end
+
 export Insertion,
     Deletion,
     Substitution,
@@ -471,6 +515,8 @@ export Insertion,
     Variation,
     reference,
     mutation,
-    variations
+    variations,
+    refbases,
+    altbases
 
 end # module

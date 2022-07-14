@@ -14,5 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Variation` type to store and compare individual mutations
 - `reconstruct!` function to build mutated sequences from `Variant`s
 - `Variant` constructor to automatically detect mutations from a `BioAlignments.PairwiseAlignment`
+- Methods to get reference and alternate bases from a `Variation`
 
 [unreleased]: https://github.com/BioJulia/SequenceVariation.jl

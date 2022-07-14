@@ -69,3 +69,33 @@ end
     sub = Variation(refseq, "A4T")
     @test first(variations(var)) == sub
 end
+
+@testset "VariationBases" begin
+    # Test substition bases
+    @test refbases(Variation(dna"ATCGA", "C3G")) == dna"C"
+    @test altbases(Variation(dna"ATCGA", "C3G")) == dna"G"
+
+    # Test single deletion bases
+    @test refbases(Variation(dna"ATCGA", "Δ3-3")) == dna"TC"
+    @test altbases(Variation(dna"ATCGA", "Δ3-3")) == dna"T"
+
+    # Test multiple deletion bases
+    @test refbases(Variation(dna"ATCGA", "Δ3-4")) == dna"TCG"
+    @test altbases(Variation(dna"ATCGA", "Δ3-4")) == dna"T"
+
+    # Test first position deletion
+    @test refbases(Variation(dna"ATCGA", "Δ1-1")) == dna"AT"
+    @test altbases(Variation(dna"ATCGA", "Δ1-1")) == dna"T"
+
+    # Test single insertion bases
+    @test refbases(Variation(dna"ATCGA", "3A")) == dna"C"
+    @test altbases(Variation(dna"ATCGA", "3A")) == dna"CA"
+
+    # Test multiple insertion bases
+    @test refbases(Variation(dna"ATCGA", "3TAG")) == dna"C"
+    @test altbases(Variation(dna"ATCGA", "3TAG")) == dna"CTAG"
+
+    # Test first position insertion
+    @test refbases(Variation(dna"ATCGA", "1C")) == dna"A"
+    @test altbases(Variation(dna"ATCGA", "1C")) == dna"CA"
+end
