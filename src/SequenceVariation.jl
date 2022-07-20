@@ -211,6 +211,8 @@ function Variant(ref::S, edits::Vector{Edit{S, T}}) where {S<:BioSequence, T<:Bi
     Variant{S, T}(ref, edits)
 end
 
+
+
 function Base.show(io::IO, x::Variant)
     n = length(x.edits)
     print(io, summary(x), " with $n edit$(n > 1 ? "s" : ""):")
@@ -365,6 +367,11 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
 
     e = parse(Edit{S,T}, edit)
     return Variation{S,T}(ref, e)
+end
+
+function Variant(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence, T<:BioSymbol}
+    edits = edit.(vars)
+    return Variant{S, T}(ref, edits)
 end
 
 reference(v::Variation) = v.ref
