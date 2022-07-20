@@ -35,6 +35,13 @@ seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
 seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
 var = Variant(align(seq1, seq2))
 
+@testset "VariantRoundtrip" begin
+    for v in variations(var)
+        @test v in var
+        @test v in Variant(seq2, [v])
+    end
+end
+
 @testset "VariationPosition" begin
     refseq = dna"ACAACTTTATCT"
     mutseq = dna"ACATCTTTATCT"
