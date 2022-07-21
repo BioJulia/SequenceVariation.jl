@@ -18,7 +18,7 @@ You can install SequenceVariation from the [Julia REPL](https://docs.julialang.o
 Press `]` to enter [pkg mode](https://docs.julialang.org/en/v1/stdlib/Pkg/), and enter the following:
 
 ```julia
-add https://github.com/SequenceVariation.jl
+add SequenceVariation.jl
 ```
 
 ## Testing
@@ -27,7 +27,7 @@ SequenceVariation is tested against Julia `1.X` on Linux, OS X, and Windows.
 
 **Latest build status:**
 
-[![Unit tests](https://github.com/BioJulia/SequenceVariation.jl/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/BioJulia/SequenceVariation.jl/actions?query=workflow%3A%22Unit+tests%22+branch%3Amaster)
+[![Unit Tests](https://github.com/BioJulia/SequenceVariation.jl/actions/workflows/UnitTests.yml/badge.svg?branch=master)](https://github.com/BioJulia/SequenceVariation.jl/actions/workflows/UnitTests.yml)
 [![Documentation](https://github.com/BioJulia/SequenceVariation.jl/workflows/Documentation/badge.svg?branch=master)](https://github.com/BioJulia/SequenceVariation.jl/actions?query=workflow%3ADocumentation+branch%3Amaster)
 [![codecov](https://codecov.io/gh/BioJulia/SequenceVariation.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/BioJulia/SequenceVariation.jl)
 
