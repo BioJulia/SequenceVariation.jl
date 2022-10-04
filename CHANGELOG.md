@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- ## Changed
+
+- Updated dependency compats ([#21](https://github.com/BioJulia/SequenceVariation.jl/pull/21))
+  - BioAlignments: 2 -> 2,3
+  - BioSequences: 2 -> 2,3
+  - BioSymbols: 4 -> 4,5
+
 ## [0.1.1] - 2022-07-21
 
 ### Added
