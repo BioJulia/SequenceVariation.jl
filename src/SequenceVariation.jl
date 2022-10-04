@@ -22,7 +22,7 @@ TODO now:
 
 using BioAlignments: BioAlignments, PairwiseAlignment
 using BioGenerics: BioGenerics, leftposition, rightposition
-using BioSequences: BioSequences, BioSequence, NucleotideSeq, AminoAcidSeq, LongSequence, isgap
+using BioSequences: BioSequences, BioSequence, NucleotideSeq, LongSequence, isgap
 using BioSymbols: BioSymbol
 
 const BA = BioAlignments
