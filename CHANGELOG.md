@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- Variations getter now returns type-parameterized vector ([#23](https://github.com/BioJulia/SequenceVariation.jl/pull/23))
+
 ## [0.1.2] - 2022-10-04
 
 - ## Changed
