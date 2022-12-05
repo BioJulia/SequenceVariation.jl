@@ -106,3 +106,13 @@ end
     @test refbases(Variation(dna"ATCGA", "1C")) == dna"A"
     @test altbases(Variation(dna"ATCGA", "1C")) == dna"CA"
 end
+
+@testset "SoftclipVariant" begin
+    refseq = dna"GATTACA"
+    mutseq = dna"GATTACAAAA"
+
+    refvar = Variant(refseq, SequenceVariation.Edit{typeof(refseq), eltype(refseq)}[])
+
+    # Test for ending soft clip
+    @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S", 1, 1)), refseq)) == refvar
+end
