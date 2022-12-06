@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Variations getter now returns type-parameterized vector ([#23](https://github.com/BioJulia/SequenceVariation.jl/pull/23))
 
+### Fixed
+
+- Soft clips at end of alignment causing invalid `Variant`s ([#25](https://github.com/BioJulia/SequenceVariation.jl/issues/25)/[#26](https://github.com/BioJulia/SequenceVariation.jl/pull/26))
+
 ## [0.1.2] - 2022-10-04
 
 - ## Changed
