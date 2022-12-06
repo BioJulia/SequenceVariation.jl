@@ -308,6 +308,7 @@ end
 
 edits(v::Variant) = v.edits
 reference(v::Variant) = v.ref
+Base.:(==)(x::Variant, y::Variant) = x.ref == y.ref && x.edits == y.edits
 
 function lendiff(edit::Edit)
     x = edit.x
