@@ -121,4 +121,7 @@ end
 
     # Test that ending insertions are still valid
     @test length(Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3I", 1, 1)), refseq)).edits) == 1
+
+    # Test that out-of-bounds bases are still caught
+    @test_throws BoundsError Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3X", 1, 1)), refseq))
 end
