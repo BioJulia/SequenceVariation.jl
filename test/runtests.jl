@@ -115,4 +115,7 @@ end
 
     # Test for ending soft clip
     @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S", 1, 1)), refseq)) == refvar
+
+    # Test for ending soft+hard clip
+    @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S2H", 1, 1)), refseq)) == refvar
 end
