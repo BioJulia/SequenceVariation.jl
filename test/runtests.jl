@@ -118,4 +118,7 @@ end
 
     # Test for ending soft+hard clip
     @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S2H", 1, 1)), refseq)) == refvar
+
+    # Test that ending insertions are still valid
+    @test length(Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3I", 1, 1)), refseq)).edits) == 1
 end
