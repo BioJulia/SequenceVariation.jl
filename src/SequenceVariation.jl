@@ -20,7 +20,7 @@ TODO now:
 * Add tests
 """
 
-using BioAlignments: BioAlignments, PairwiseAlignment
+using BioAlignments: BioAlignments, PairwiseAlignment, OP_SOFT_CLIP
 using BioGenerics: BioGenerics, leftposition, rightposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, LongSequence, isgap
 using BioSymbols: BioSymbol
@@ -300,11 +300,16 @@ function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
         end
     end
 
+    # Check for clips at the end of the alignment
+    last_anchors = aln.a.aln.anchors[end-1:end]
+
     # Final indel, if applicable
-    if !iszero(n_gaps)
-        push!(edits, Edit{T, E}(Deletion(UInt(n_gaps)), UInt(markpos)))
-    elseif !iszero(n_ins)
-        push!(edits, Edit{T, E}(Insertion(T(insertion_buffer)), UInt(markpos)))
+    if !any(anchor -> anchor.op == OP_SOFT_CLIP, last_anchors)
+        if !iszero(n_gaps)
+            push!(edits, Edit{T, E}(Deletion(UInt(n_gaps)), UInt(markpos)))
+        elseif !iszero(n_ins)
+            push!(edits, Edit{T, E}(Insertion(T(insertion_buffer)), UInt(markpos)))
+        end
     end
 
     return result
