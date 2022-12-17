@@ -7,15 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.3] - 2022-11-22
-
-## Changed
-
-- Variations getter now returns type-parameterized vector ([#23](https://github.com/BioJulia/SequenceVariation.jl/pull/23))
+### [0.1.4] - 2022-12-17
 
 ### Fixed
 
 - Soft clips at end of alignment causing invalid `Variant`s ([#25](https://github.com/BioJulia/SequenceVariation.jl/issues/25)/[#26](https://github.com/BioJulia/SequenceVariation.jl/pull/26))
+
+### [0.1.3] - 2022-11-22
+
+## Changed
+
+- Variations getter now returns type-parameterized vector ([#23](https://github.com/BioJulia/SequenceVariation.jl/pull/23))
 
 ## [0.1.2] - 2022-10-04
 
@@ -43,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Variant` constructor to automatically detect mutations from a `BioAlignments.PairwiseAlignment`
 - Methods to get reference and alternate bases from a `Variation`
 
-[unreleased]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.3...HEAD
+[unreleased]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.0...v0.1.1
