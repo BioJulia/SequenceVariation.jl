@@ -263,7 +263,6 @@ function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
     ref = aln.b
     E = eltype(typeof(ref))
     edits = Edit{T, E}[]
-    result = Variant(ref, edits)
     refpos = first(aln.a.aln.anchors).refpos
     seqpos = first(aln.a.aln.anchors).seqpos
     markpos = 0
@@ -312,7 +311,7 @@ function Variant(aln::PairwiseAlignment{T, T}) where {T <: LongSequence{<:Union{
         end
     end
 
-    return result
+    return Variant(ref, edits)
 end
 
 edits(v::Variant) = v.edits
