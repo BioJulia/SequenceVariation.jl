@@ -246,7 +246,7 @@ function is_valid(v::Variant)
         # for next op. However, we cannot have two insertions at the same position, because
         # then the order of them is ambiguous
         elseif op isa Insertion
-            pos in (first(valid_positions)-1+last_was_insert:last(valid_positions)) || return false
+            pos in (first(valid_positions)-1+last_was_insert:last(valid_positions)+1) || return false
             last_was_insert = true
         # Deletions obviously invalidate the reference bases that are deleted.
         elseif op isa Deletion
@@ -399,7 +399,7 @@ function is_valid(v::Variation)
     if op isa Substitution
         return pos in eachindex(v.ref)
     elseif op isa Insertion
-        return pos in 0:lastindex(v.ref)
+        return pos in 0:lastindex(v.ref)+1
     elseif op isa Deletion
         return pos in 1:(lastindex(v.ref)-length(op) + 1)
     end
