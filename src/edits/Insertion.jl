@@ -18,7 +18,7 @@ Base.length(x::Insertion) = length(x.seq)
 Base.:(==)(x::Insertion, y::Insertion) = x.seq == y.seq
 Base.hash(x::Insertion, h::UInt) = hash(Insertion, hash(x.seq, h))
 
-function _refbases(i::Insertion, reference::S, pos::UInt) where {S<:BioSequence}
+function _refbases(::Insertion, reference::S, pos::UInt) where {S<:BioSequence}
     return S([reference[pos]])
 end
 
