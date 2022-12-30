@@ -1,14 +1,4 @@
-"""
-    Substitution
-
-Represents the presence of a `T` at a given position. The position is stored
-outside this struct.
-"""
-struct Substitution{T<:BioSymbol}
-    x::T
-end
-Base.:(==)(x::Substitution, y::Substitution) = x.x == y.x
-Base.hash(x::Substitution, h::UInt) = hash(Substitution, hash(x.x, h))
+include("edits/Substitution.jl")
 
 """
     Deletion
@@ -103,14 +93,6 @@ end
 function lendiff(edit::Edit)
     x = edit.x
     return x isa Substitution ? 0 : (x isa Deletion ? -length(x) : length(x.x))
-end
-
-function _refbases(s::Substitution, reference::S, pos::UInt) where {S<:BioSequence}
-    return S([reference[pos]])
-end
-
-function _altbases(s::Substitution, reference::S, pos::UInt) where {S<:BioSequence}
-    return S([s.x])
 end
 
 function _refbases(d::Deletion, reference::S, pos::UInt) where {S<:BioSequence}
