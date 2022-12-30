@@ -28,24 +28,8 @@ using BioSymbols: BioSymbol
 const BA = BioAlignments
 const BS = BioSequences
 
-#=
-import Automa
-import Automa.RegExp: @re_str
-=#
-
 struct Unsafe end
 struct Inapplicable end
-
-#=
-const CONTEXT = Automa.CodeGenContext(
-    vars=Automa.Variables(:p, :p_end, :p_eof, :ts, :te, :cs, :data, :mem, :byte),
-    generator=:goto,
-    checkbounds=false
-)
-
-
-const BYTES = Union{String, SubString{String}, Vector{UInt8}}
-=#
 
 """
     Substitution
@@ -148,48 +132,6 @@ function BioGenerics.rightposition(e::Edit)
         error("Unknown mutation type $(typeof(mutation(e)))")
     end
 end
-
-#=
-@noinline throw_parse_error(T, p::Integer) = error("Failed to parse $T at byte $p")
-
-# Parse substitution
-let
-    machine = let
-        biosymbol = re"[A-Za-z]"
-        number = re"[0-9]+"
-
-        biosymbol.actions[:enter] = [:enter]
-        number.actions[:all] = [:digit]
-
-        Automa.compile(biosymbol * number * biosymbol)
-    end
-    actions = Dict(
-        :enter => quote
-            symbol = T(Char(byte))
-            if firstsymbol === nothing
-                firstsymbol = symbol
-            else
-                lastsymbol = symbol
-            end
-        end,
-        :digit => :(num = UInt(10)*num + (byte - 0x30) % UInt),
-    )
-    @eval begin
-        function Base.parse(::Type{Edit{S, T}}, data::BYTES) where {S, T}
-            $(Automa.generate_init_code(CONTEXT, machine))
-            p_eof = p_end = sizeof(data)
-            firstsymbol = lastsymbol = nothing
-            num = UInt(0)
-            $(Automa.generate_exec_code(CONTEXT, machine, actions))
-            iszero(cs) || throw_parse_error(Edit{S, T}, p)
-            if firstsymbol == lastsymbol
-                error("First symbol and last symbol are identical")
-            end
-            return Edit{S, T}(Substitution{T}(lastsymbol), num)
-        end
-    end
-end
-=#
 
 # Edits are applied sequentially from first to last pos.
 # The vector must always be sorted by pos.
