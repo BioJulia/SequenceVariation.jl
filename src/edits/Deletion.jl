@@ -26,7 +26,7 @@ function _refbases(d::Deletion, reference::S, pos::UInt) where {S<:BioSequence}
     end
 end
 
-function _altbases(d::Deletion, reference::S, pos::UInt) where {S<:BioSequence}
+function _altbases(::Deletion, reference::S, pos::UInt) where {S<:BioSequence}
     if pos == 1
         return S([reference[pos + 1]])
     else
