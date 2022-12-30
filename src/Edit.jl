@@ -13,9 +13,10 @@ struct Edit{S<:BioSequence,T<:BioSymbol}
     x::Union{Substitution{T},Deletion,Insertion{S}}
     pos::UInt
 end
+
+Base.length(e::Edit) = length(mutation(e))
 Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
 Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
-Base.length(e::Edit) = e isa Substitution ? 1 : length(mutation(e))
 
 function Base.parse(::Type{T}, s::AbstractString) where {T<:Edit{Se,Sy}} where {Se,Sy}
     return parse(T, String(s))
