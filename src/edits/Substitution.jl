@@ -8,6 +8,7 @@ struct Substitution{T<:BioSymbol}
     x::T
 end
 
+Base.length(::Substitution) = 1
 Base.:(==)(x::Substitution, y::Substitution) = x.x == y.x
 Base.hash(x::Substitution, h::UInt) = hash(Substitution, hash(x.x, h))
 
