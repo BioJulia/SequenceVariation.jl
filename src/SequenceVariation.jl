@@ -25,6 +25,17 @@ using BioGenerics: BioGenerics, leftposition, rightposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, LongSequence, isgap
 using BioSymbols: BioSymbol
 
+export Deletion
+export Insertion
+export Substitution
+export Variant
+export Variation
+export altbases
+export mutation
+export refbases
+export reference
+export variations
+
 const BA = BioAlignments
 const BS = BioSequences
 
@@ -34,16 +45,5 @@ struct Inapplicable end
 include("Edit.jl")
 include("Variant.jl")
 include("Variation.jl")
-
-export Insertion,
-    Deletion,
-    Substitution,
-    Variant,
-    Variation,
-    reference,
-    mutation,
-    variations,
-    refbases,
-    altbases
 
 end # module
