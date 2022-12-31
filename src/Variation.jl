@@ -50,14 +50,37 @@ function Variant(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:
     return Variant{S,T}(ref, edits)
 end
 
+"""
+    reference(v::Variation)
+
+Gets the reference sequence of `v`
+"""
 reference(v::Variation) = v.ref
+
+"""
+    _edit(v::Variation)
+
+Gets the underlying [`Edit`](@ref) of `v`
+"""
 _edit(v::Variation) = v.edit
+
+"""
+    mutation(v::Variation)
+
+Gets the underlying [`Substitution`](@ref), [`Insertion`](@ref), or [`Deletion`](@ref) of
+`v`.
+"""
 mutation(v::Variation) = _mutation(_edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(_edit(v))
 BioGenerics.rightposition(v::Variation) = rightposition(_edit(v))
 Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
 Base.hash(x::Variation, h::UInt) = hash(Variation, hash((x.ref, x.edit), h))
 
+"""
+    _is_valid(v::Variation)
+
+Validate `v`. `v` is invalid if its opertation is out of bounds.
+"""
 function _is_valid(v::Variation)
     isempty(v.ref) && return false
     op = v.edit.x
@@ -92,6 +115,13 @@ function Base.in(v::Variation, var::Variant)
     return any(v.edit == edit for edit in var.edits)
 end
 
+"""
+    translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
+
+Convert the difference in `var` to a new reference sequence based upon `aln`. `aln` is the
+alignment of the old reference (`aln.b`) and the new reference sequence (`aln.seq`). Returns
+the new [`Variation`](@ref).
+"""
 function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
     kind = mutation(var)
     pos = leftposition(var)
@@ -153,10 +183,24 @@ function variations(v::Variant{S,T}) where {S,T}
     return vs
 end
 
+"""
+    refbases(v::Variation)
+
+Get the reference bases of `v`. Note that for deletions, `refbases` also returns the base
+_before_ the deletion in accordance with the `REF` field of the
+[VCF v4 specification](https://samtools.github.io/hts-specs/VCFv4.3.pdf).
+"""
 function refbases(v::Variation)
     return _refbases(mutation(v), reference(v), leftposition(v))
 end
 
+"""
+    altbases(v::Variation)
+
+Get the alternate bases of `v`. Note that for insertions, `altbases` also returns the base
+_before_ the insertion in accordance with the `ALT` field of the
+[VCF v4 specification](https://samtools.github.io/hts-specs/VCFv4.3.pdf).
+"""
 function altbases(v::Variation)
     return _altbases(mutation(v), reference(v), leftposition(v))
 end
