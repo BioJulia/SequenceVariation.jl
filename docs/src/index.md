@@ -18,7 +18,7 @@ You can install SequenceVariation from the [Julia REPL](https://docs.julialang.o
 Press `]` to enter [pkg mode](https://docs.julialang.org/en/v1/stdlib/Pkg/), and enter the following:
 
 ```julia
-add SequenceVariation.jl
+add SequenceVariation
 ```
 
 ## Testing
