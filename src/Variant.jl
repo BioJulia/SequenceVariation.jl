@@ -40,7 +40,7 @@ function _is_valid(v::Variant)
         op = edit.x
         # Sanity check: for this to be a valid variant, it must be comprised of valid
         # variations
-        is_valid(Variation(v.ref, edit)) || return false
+        _is_valid(Variation(v.ref, edit)) || return false
 
         # For substitutions we simply do not allow another modification of the same base
         if op isa Substitution

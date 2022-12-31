@@ -11,7 +11,7 @@ end
 
 function Variation{S,T}(ref::S, e::Edit{S,T}) where {S<:BioSequence,T<:BioSymbol}
     v = Variation{S,T}(ref, e, Unsafe())
-    return is_valid(v) ? v : throw(ArgumentError("Invalid variant"))
+    return _is_valid(v) ? v : throw(ArgumentError("Invalid variant"))
 end
 
 Variation(ref::S, edit::Edit{S,T}) where {S,T} = Variation{S,T}(ref, edit)
@@ -36,7 +36,7 @@ BioGenerics.rightposition(v::Variation) = rightposition(_edit(v))
 Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
 Base.hash(x::Variation, h::UInt) = hash(Variation, hash((x.ref, x.edit), h))
 
-function is_valid(v::Variation)
+function _is_valid(v::Variation)
     isempty(v.ref) && return false
     op = v.edit.x
     pos = v.edit.pos
