@@ -30,6 +30,7 @@ SequenceVariation is tested against Julia `1.X` on Linux, OS X, and Windows.
 [![Unit Tests](https://github.com/BioJulia/SequenceVariation.jl/actions/workflows/UnitTests.yml/badge.svg?branch=master)](https://github.com/BioJulia/SequenceVariation.jl/actions/workflows/UnitTests.yml)
 [![Documentation](https://github.com/BioJulia/SequenceVariation.jl/workflows/Documentation/badge.svg?branch=master)](https://github.com/BioJulia/SequenceVariation.jl/actions?query=workflow%3ADocumentation+branch%3Amaster)
 [![codecov](https://codecov.io/gh/BioJulia/SequenceVariation.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/BioJulia/SequenceVariation.jl)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 ## Contributing
 
