@@ -32,8 +32,10 @@ export Variant
 export Variation
 export altbases
 export mutation
+export reconstruct!
 export refbases
 export reference
+export translate
 export variations
 
 const BA = BioAlignments
