@@ -71,9 +71,10 @@ function Base.in(v::Variation, var::Variant)
 end
 
 function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
-    kind = var.edit.x
-    pos = var.edit.pos
-    seq, ref = aln.seq, aln.b
+    kind = mutation(var)
+    pos = leftposition(var)
+    seq = sequence(aln)
+    ref = aln.b
 
     # Special case: Insertions may have a pos of 0, which cannot be mapped to
     # the seq using ref2seq
