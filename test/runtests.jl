@@ -23,6 +23,7 @@ TODO now:
 * Add tests
 """
 
+using Aqua
 using BioAlignments
 using BioSequences
 using SequenceVariation
@@ -124,4 +125,17 @@ end
 
     # Test that out-of-bounds bases are still caught
     @test_throws BoundsError Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3X", 1, 1)), refseq))
+end
+
+@testset "Aqua" begin
+    Aqua.test_ambiguities(SequenceVariation;recursive=false)
+    # TODO: Refactor `Edit` so that this test doesn't fail
+    # TODO: This test _should_ be set to @test_fails, but Aqua's syntax doesn't allow that
+    # Aqua.test_unbound_args(SequenceVariation)
+    Aqua.test_undefined_exports(SequenceVariation)
+    Aqua.test_piracy(SequenceVariation)
+    Aqua.test_project_extras(SequenceVariation)
+    Aqua.test_stale_deps(SequenceVariation)
+    Aqua.test_deps_compat(SequenceVariation)
+    Aqua.test_project_toml_formatting(SequenceVariation)
 end
