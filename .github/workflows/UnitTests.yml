@@ -19,8 +19,6 @@ jobs:
           - x64
         os:
           - ubuntu-latest
-          - windows-latest
-          - macOS-latest
 
     steps:
       - name: Checkout repository
