@@ -1,6 +1,10 @@
 using Pkg
 using Documenter
 using SequenceVariation
+using Revise
+
+# see https://github.com/tlienart/LiveServer.jl/issues/140#issuecomment-1271591251
+Revise.revise()
 
 makedocs(;
     checkdocs = :exports,
@@ -10,6 +14,9 @@ makedocs(;
     modules = [SequenceVariation],
     pages = [
         "Home" => "index.md",
+        "Working with variants" => "variants.md",
+        "Working with variations" => "variations.md",
+        "Comparing variations" => "compare.md",
         "API Reference" => "api.md",
     ],
     authors = replace(join(Pkg.TOML.parsefile("Project.toml")["authors"], ", "), r" <.*?>" => "" ) * ", The BioJulia Organisation, and other contributors."
