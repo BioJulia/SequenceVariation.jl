@@ -1,6 +1,16 @@
 [deps]
+BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"
+BioSequences = "7e6ae17a-c86d-528c-b3b9-7f778a29fe59"
+BioSymbols = "3c28c6f8-a34d-59c4-9654-267d177fcfa9"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SequenceVariation = "eef6e190-9969-4f06-a38f-35a110a8fdc8"
 
 [compat]
+BioAlignments = "3"
+BioSequences = "3"
+BioSymbols = "5"
 Documenter = "0.27"
+Revise = "3.4"
+julia = "1.6"
