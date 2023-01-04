@@ -171,14 +171,14 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 end
 
 """
-    variations(v::Haplotype{S,T}) where {S,T}
+    variations(h::Haplotype{S,T}) where {S,T}
 
-Converts the [`Edit`](@ref)s of `v` into a vector of [`Variation`](@ref)s.
+Converts the [`Edit`](@ref)s of `h` into a vector of [`Variation`](@ref)s.
 """
-function variations(v::Haplotype{S,T}) where {S,T}
-    vs = Vector{Variation{S,T}}(undef, length(_edits(v)))
-    for (i, e) in enumerate(_edits(v))
-        vs[i] = Variation{S,T}(reference(v), e)
+function variations(h::Haplotype{S,T}) where {S,T}
+    vs = Vector{Variation{S,T}}(undef, length(_edits(h)))
+    for (i, e) in enumerate(_edits(h))
+        vs[i] = Variation{S,T}(reference(h), e)
     end
     return vs
 end

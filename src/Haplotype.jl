@@ -48,21 +48,21 @@ function Base.show(io::IO, x::Haplotype)
 end
 
 """
-    is_valid(v::Haplotype)
+    is_valid(h::Haplotype)
 
-Validate `v`. `v` is invalid if any of its operations are out of bounds, or the same
+Validate `h`. `h` is invalid if any of its operations are out of bounds, or the same
 position is affected by multiple edits.
 """
-function _is_valid(v::Haplotype)
-    isempty(v.ref) && return false
-    valid_positions = 1:length(v.ref)
+function _is_valid(h::Haplotype)
+    isempty(h.ref) && return false
+    valid_positions = 1:length(h.ref)
     last_was_insert = false
-    for edit in v.edits
+    for edit in h.edits
         pos = edit.pos
         op = edit.x
         # Sanity check: for this to be a valid variant, it must be comprised of valid
         # variations
-        _is_valid(Variation(v.ref, edit)) || return false
+        _is_valid(Variation(h.ref, edit)) || return false
 
         # For substitutions we simply do not allow another modification of the same base
         if op isa Substitution
@@ -147,18 +147,18 @@ function Haplotype(
 end
 
 """
-    _edits(v::Haplotype)
+    _edits(h::Haplotype)
 
-Gets the [`Edit`](@ref)s that comprise `v`
+Gets the [`Edit`](@ref)s that comprise `h`
 """
-_edits(v::Haplotype) = v.edits
+_edits(h::Haplotype) = h.edits
 
 """
-    reference(v::Haplotype)
+    reference(h::Haplotype)
 
-Gets the reference sequence of `v`.
+Gets the reference sequence of `h`.
 """
-reference(v::Haplotype) = v.ref
+reference(h::Haplotype) = h.ref
 Base.:(==)(x::Haplotype, y::Haplotype) = x.ref == y.ref && x.edits == y.edits
 
 """
