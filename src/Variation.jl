@@ -118,6 +118,11 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
     end
 end
 
+"""
+    variations(v::Variant{S,T}) where {S,T}
+
+Converts the [`Edit`](@ref)s of `v` into a vector of [`Variation`](@ref)s.
+"""
 function variations(v::Variant{S,T}) where {S,T}
     vs = Vector{Variation{S,T}}(undef, length(_edits(v)))
     for (i, e) in enumerate(_edits(v))
