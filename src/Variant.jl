@@ -129,7 +129,7 @@ reference(v::Variant) = v.ref
 Base.:(==)(x::Variant, y::Variant) = x.ref == y.ref && x.edits == y.edits
 
 function reconstruct!(seq::S, x::Variant{S}) where {S}
-    len = length(x.ref) + sum(edit -> lendiff(edit), x.edits)
+    len = length(x.ref) + sum(edit -> _lendiff(edit), _edits(x))
     resize!(seq, len % UInt)
     refpos = seqpos = 1
     for edit in x.edits
