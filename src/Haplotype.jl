@@ -1,41 +1,43 @@
 """
-    Variant{S<:BioSequence,T<:BioSymbol}
+    Haplotype{S<:BioSequence,T<:BioSymbol}
 
 A set of variations within a given sequence that are all found together. Depending on the
 field, it might also be referred to as a "genotype," "haplotype," or "strain."
 
 # Constructors
 
-    Variant(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
-    Variant(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:BioSymbol}
-    Variant(
+    Haplotype(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
+    Haplotype(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:BioSymbol}
+    Haplotype(
         aln::PairwiseAlignment{T,T}
     ) where {T<:LongSequence{<:Union{BS.AminoAcidAlphabet,BS.NucleicAcidAlphabet}}}
 
-When constructing a `Variant` from a vector of [`Edit`](@ref)s or [`Variation`](@ref)s, the
-edits are applied sequentially from first to last position, therefore the vector must always
-be sorted by position. These edits are sorted automatically if constructing from an
+When constructing a `Haplotype` from a vector of [`Edit`](@ref)s or [`Variation`](@ref)s,
+the edits are applied sequentially from first to last position, therefore the vector must
+always be sorted by position. These edits are sorted automatically if constructing from an
 alignment.
 """
-struct Variant{S<:BioSequence,T<:BioSymbol}
+struct Haplotype{S<:BioSequence,T<:BioSymbol}
     ref::S
     edits::Vector{Edit{S,T}}
 
-    Variant{S,T}(ref::S, edits::Vector{Edit{S,T}}, ::Unsafe) where {S,T} = new(ref, edits)
+    Haplotype{S,T}(ref::S, edits::Vector{Edit{S,T}}, ::Unsafe) where {S,T} = new(ref, edits)
 end
 
-function Variant{S,T}(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
+function Haplotype{S,T}(
+    ref::S, edits::Vector{Edit{S,T}}
+) where {S<:BioSequence,T<:BioSymbol}
     sort!(edits; by=x -> x.pos)
-    result = Variant{S,T}(ref, edits, Unsafe())
+    result = Haplotype{S,T}(ref, edits, Unsafe())
     _is_valid(result) || error("TODO") # report what kind of error message?
     return result
 end
 
-function Variant(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
-    return Variant{S,T}(ref, edits)
+function Haplotype(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
+    return Haplotype{S,T}(ref, edits)
 end
 
-function Base.show(io::IO, x::Variant)
+function Base.show(io::IO, x::Haplotype)
     n = length(x.edits)
     print(io, summary(x), " with $n edit$(n > 1 ? "s" : ""):")
     for i in x.edits
@@ -46,12 +48,12 @@ function Base.show(io::IO, x::Variant)
 end
 
 """
-    is_valid(v::Variant)
+    is_valid(v::Haplotype)
 
 Validate `v`. `v` is invalid if any of its operations are out of bounds, or the same
 position is affected by multiple edits.
 """
-function _is_valid(v::Variant)
+function _is_valid(v::Haplotype)
     isempty(v.ref) && return false
     valid_positions = 1:length(v.ref)
     last_was_insert = false
@@ -87,7 +89,7 @@ function _is_valid(v::Variant)
     return true
 end
 
-function Variant(
+function Haplotype(
     aln::PairwiseAlignment{T,T}
 ) where {T<:LongSequence{<:Union{BS.AminoAcidAlphabet,BS.NucleicAcidAlphabet}}}
     ref = aln.b
@@ -141,30 +143,30 @@ function Variant(
         end
     end
 
-    return Variant(ref, edits)
+    return Haplotype(ref, edits)
 end
 
 """
-    _edits(v::Variant)
+    _edits(v::Haplotype)
 
 Gets the [`Edit`](@ref)s that comprise `v`
 """
-_edits(v::Variant) = v.edits
+_edits(v::Haplotype) = v.edits
 
 """
-    reference(v::Variant)
+    reference(v::Haplotype)
 
 Gets the reference sequence of `v`.
 """
-reference(v::Variant) = v.ref
-Base.:(==)(x::Variant, y::Variant) = x.ref == y.ref && x.edits == y.edits
+reference(v::Haplotype) = v.ref
+Base.:(==)(x::Haplotype, y::Haplotype) = x.ref == y.ref && x.edits == y.edits
 
 """
-    reconstruct!(seq::S, x::Variant{S}) where {S}
+    reconstruct!(seq::S, x::Haplotype{S}) where {S}
 
 Apply the edits in `x` to `seq` and return the mutated sequence
 """
-function reconstruct!(seq::S, x::Variant{S}) where {S}
+function reconstruct!(seq::S, x::Haplotype{S}) where {S}
     len = length(x.ref) + sum(edit -> _lendiff(edit), _edits(x))
     resize!(seq, len % UInt)
     refpos = seqpos = 1

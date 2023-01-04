@@ -12,7 +12,7 @@ and built-in validation.
     Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
 
 Generally speaking, the `Edit` constructor should be avoided to ensure corectness: use of
-[`variations(::Variant)`](@ref) is encouraged, instead.
+[`variations(::Haplotype)`](@ref) is encouraged, instead.
 
 Constructing a `Variation` from an `AbstractString` will parse the from `edit` using the
 following syntax:
@@ -45,9 +45,9 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
     return Variation{S,T}(ref, e)
 end
 
-function Variant(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:BioSymbol}
+function Haplotype(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:BioSymbol}
     edits = _edit.(vars)
-    return Variant{S,T}(ref, edits)
+    return Haplotype{S,T}(ref, edits)
 end
 
 """
@@ -108,7 +108,7 @@ function Base.show(io::IO, x::Variation)
     end
 end
 
-function Base.in(v::Variation, var::Variant)
+function Base.in(v::Variation, var::Haplotype)
     if v.ref != var.ref
         error("References must be equal")
     end
@@ -171,11 +171,11 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 end
 
 """
-    variations(v::Variant{S,T}) where {S,T}
+    variations(v::Haplotype{S,T}) where {S,T}
 
 Converts the [`Edit`](@ref)s of `v` into a vector of [`Variation`](@ref)s.
 """
-function variations(v::Variant{S,T}) where {S,T}
+function variations(v::Haplotype{S,T}) where {S,T}
     vs = Vector{Variation{S,T}}(undef, length(_edits(v)))
     for (i, e) in enumerate(_edits(v))
         vs[i] = Variation{S,T}(reference(v), e)

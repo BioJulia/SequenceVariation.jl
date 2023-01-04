@@ -6,7 +6,7 @@ CurrentModule = SequenceVariation
 
 ## Checking for variations in a known variant
 
-Looking for a known [`Variation`](@ref) within a [`Variant`](@ref) is
+Looking for a known [`Variation`](@ref) within a [`Haplotype`](@ref) is
 efficiently accomplished using the `in` operator.
 
 ```@setup call_variants
@@ -21,8 +21,8 @@ bos_ovis_alignment =
 bos_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), bovine);
 
-bos_ovis_variant = Variant(bos_ovis_alignment)
-bos_human_variant = Variant(bos_human_alignment)
+bos_ovis_variant = Haplotype(bos_ovis_alignment)
+bos_human_variant = Haplotype(bos_human_alignment)
 ```
 
 ```@example call_variants
@@ -42,6 +42,6 @@ that aren't validated by another variant.
 
 ```@repl call_variants
 sheeple = vcat(variations(bos_ovis_variant), variations(bos_human_variant));
-Variant(bovine, sheeple)
+Haplotype(bovine, sheeple)
 reconstruct!(bovine, ans)
 ```

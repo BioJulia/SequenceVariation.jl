@@ -8,7 +8,7 @@ CurrentModule = SequenceVariation
 
 The first step in working with sequence variation is to identify (call)
 variations. SequenceVariation can directly call variants using the
-`Variant(::PairwiseAlignment)` constructor of the [`Variant`](@ref) type.
+`Haplotype(::PairwiseAlignment)` constructor of the [`Haplotype`](@ref) type.
 
 ```@repl call_variants
 using SequenceVariation, BioAlignments, BioSequences
@@ -22,8 +22,8 @@ bos_ovis_alignment =
 bos_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), bovine);
 
-bos_ovis_variant = Variant(bos_ovis_alignment)
-bos_human_variant = Variant(bos_human_alignment)
+bos_ovis_variant = Haplotype(bos_ovis_alignment)
+bos_human_variant = Haplotype(bos_human_alignment)
 ```
 
 ## Sequence reconstruction

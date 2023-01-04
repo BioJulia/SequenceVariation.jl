@@ -18,8 +18,8 @@ Insertion
 ## Variants
 
 ```@docs
-Variant
-reference(::Variant)
+Haplotype
+reference(::Haplotype)
 variations
 reconstruct!
 ```
@@ -49,7 +49,7 @@ _lendiff
 
 ```@docs
 _edits
-_is_valid(::Variant)
+_is_valid(::Haplotype)
 ```
 
 ### Variations

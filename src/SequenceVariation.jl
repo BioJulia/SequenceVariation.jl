@@ -2,10 +2,10 @@ module SequenceVariation
 
 """
 Needs to be able to:
-* Given a sequence and a reference, create a `Variant` that unambiguously represents
+* Given a sequence and a reference, create a `Haplotype` that unambiguously represents
 the sequence
 
-* Given a `Variant` and a new reference, translate the variant to the new reference.
+* Given a `Haplotype` and a new reference, translate the variant to the new reference.
 
 * Given a mutation and a reference and a sequence, determine if the sequence has that
 mutation
@@ -26,9 +26,9 @@ using BioSequences: BioSequences, BioSequence, NucleotideSeq, LongSequence, isga
 using BioSymbols: BioSymbol
 
 export Deletion
+export Haplotype
 export Insertion
 export Substitution
-export Variant
 export Variation
 export altbases
 export mutation
