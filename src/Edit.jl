@@ -42,6 +42,12 @@ function Base.parse(::Type{<:Edit{Se,Sy}}, s::Union{String,SubString{String}}) w
     end
 end
 
+"""
+    _mutation(e::Edit)
+
+Returns the underlying [`Substitution`](@ref), [`Insertion`](@ref), or [`Deletion`](@ref) of
+`e`.
+"""
 _mutation(e::Edit) = e.x
 BioGenerics.leftposition(e::Edit) = e.pos
 function BioGenerics.rightposition(e::Edit)
