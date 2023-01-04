@@ -29,7 +29,7 @@ using BioSequences
 using SequenceVariation
 using Test
 
-const DNA_MODEL = BioAlignments.AffineGapScoreModel(EDNAFULL, gap_open=-25, gap_extend=-2)
+const DNA_MODEL = BioAlignments.AffineGapScoreModel(EDNAFULL; gap_open=-25, gap_extend=-2)
 
 align(a::BioSequence, b::BioSequence) = pairalign(GlobalAlignment(), a, b, DNA_MODEL).aln
 seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
@@ -112,23 +112,33 @@ end
     refseq = dna"GATTACA"
     mutseq = dna"GATTACAAAA"
 
-    refvar = Variant(refseq, SequenceVariation.Edit{typeof(refseq), eltype(refseq)}[])
+    refvar = Variant(refseq, SequenceVariation.Edit{typeof(refseq),eltype(refseq)}[])
 
     # Test for ending soft clip
-    @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S", 1, 1)), refseq)) == refvar
+    @test Variant(
+        PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S", 1, 1)), refseq)
+    ) == refvar
 
     # Test for ending soft+hard clip
-    @test Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S2H", 1, 1)), refseq)) == refvar
+    @test Variant(
+        PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S2H", 1, 1)), refseq)
+    ) == refvar
 
     # Test that ending insertions are still valid
-    @test length(Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3I", 1, 1)), refseq)).edits) == 1
+    @test length(
+        Variant(
+            PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3I", 1, 1)), refseq)
+        ).edits,
+    ) == 1
 
     # Test that out-of-bounds bases are still caught
-    @test_throws BoundsError Variant(PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3X", 1, 1)), refseq))
+    @test_throws BoundsError Variant(
+        PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3X", 1, 1)), refseq)
+    )
 end
 
 @testset "Aqua" begin
-    Aqua.test_ambiguities(SequenceVariation;recursive=false)
+    Aqua.test_ambiguities(SequenceVariation; recursive=false)
     # TODO: Refactor `Edit` so that this test doesn't fail
     # TODO: This test _should_ be set to @test_fails, but Aqua's syntax doesn't allow that
     # Aqua.test_unbound_args(SequenceVariation)
