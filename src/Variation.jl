@@ -30,7 +30,7 @@ end
 
 reference(v::Variation) = v.ref
 edit(v::Variation) = v.edit
-mutation(v::Variation) = mutation(edit(v))
+mutation(v::Variation) = _mutation(edit(v))
 BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
 BioGenerics.rightposition(v::Variation) = rightposition(edit(v))
 Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
