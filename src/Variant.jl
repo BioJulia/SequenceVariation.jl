@@ -10,7 +10,7 @@ end
 function Variant{S,T}(ref::S, edits::Vector{Edit{S,T}}) where {S<:BioSequence,T<:BioSymbol}
     sort!(edits; by=x -> x.pos)
     result = Variant{S,T}(ref, edits, Unsafe())
-    is_valid(result) || error("TODO") # report what kind of error message?
+    _is_valid(result) || error("TODO") # report what kind of error message?
     return result
 end
 
@@ -31,7 +31,7 @@ end
 # Validate:
 # A sequence is invalid if any of its operations are out of bounds, or the same position
 # is affected by multiple edits.
-function is_valid(v::Variant)
+function _is_valid(v::Variant)
     isempty(v.ref) && return false
     valid_positions = 1:length(v.ref)
     last_was_insert = false
