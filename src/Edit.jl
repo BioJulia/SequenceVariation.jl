@@ -56,7 +56,7 @@ function BioGenerics.rightposition(e::Edit)
     end
 end
 
-function lendiff(edit::Edit)
+function _lendiff(edit::Edit)
     x = _mutation(edit)
     # Each edit type has logic for its length, we just need to know what direction to go
     multiplier = x isa Substitution ? 0 : (x isa Deletion ? -1 : 1)
