@@ -7,21 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### [0.1.4] - 2022-12-17
+### Added
+
+- Tutorial-type documentation ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+
+### Changed
+
+- Code now follows [Blue style](https://github.com/invenia/BlueStyle) ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+- :bomb: [BREAKING] Public and private API defined based on Blue style guidelines ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+
+### Removed
+
+- Windows and MacOS CI tests ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+
+## [0.1.4] - 2022-12-17
 
 ### Fixed
 
 - Soft clips at end of alignment causing invalid `Variant`s ([#25](https://github.com/BioJulia/SequenceVariation.jl/issues/25)/[#26](https://github.com/BioJulia/SequenceVariation.jl/pull/26))
 
-### [0.1.3] - 2022-11-22
+## [0.1.3] - 2022-11-22
 
-## Changed
+### Changed
 
 - Variations getter now returns type-parameterized vector ([#23](https://github.com/BioJulia/SequenceVariation.jl/pull/23))
 
 ## [0.1.2] - 2022-10-04
 
-## Changed
+### Changed
 
 - Updated dependency compats ([#21](https://github.com/BioJulia/SequenceVariation.jl/pull/21))
   - BioAlignments: 2 -> 2,3
