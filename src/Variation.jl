@@ -119,8 +119,8 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 end
 
 function variations(v::Variant{S,T}) where {S,T}
-    vs = Vector{Variation{S,T}}(undef, length(edits(v)))
-    for (i, e) in enumerate(edits(v))
+    vs = Vector{Variation{S,T}}(undef, length(_edits(v)))
+    for (i, e) in enumerate(_edits(v))
         vs[i] = Variation{S,T}(reference(v), e)
     end
     return vs
