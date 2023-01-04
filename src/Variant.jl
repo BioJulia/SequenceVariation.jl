@@ -45,9 +45,12 @@ function Base.show(io::IO, x::Variant)
     end
 end
 
-# Validate:
-# A sequence is invalid if any of its operations are out of bounds, or the same position
-# is affected by multiple edits.
+"""
+    is_valid(v::Variant)
+
+Validate `v`. `v` is invalid if any of its operations are out of bounds, or the same
+position is affected by multiple edits.
+"""
 function _is_valid(v::Variant)
     isempty(v.ref) && return false
     valid_positions = 1:length(v.ref)
@@ -141,10 +144,26 @@ function Variant(
     return Variant(ref, edits)
 end
 
+"""
+    _edits(v::Variant)
+
+Gets the [`Edit`](@ref)s that comprise `v`
+"""
 _edits(v::Variant) = v.edits
+
+"""
+    reference(v::Variant)
+
+Gets the reference sequence of `v`.
+"""
 reference(v::Variant) = v.ref
 Base.:(==)(x::Variant, y::Variant) = x.ref == y.ref && x.edits == y.edits
 
+"""
+    reconstruct!(seq::S, x::Variant{S}) where {S}
+
+Apply the edits in `x` to `seq` and return the mutated sequence
+"""
 function reconstruct!(seq::S, x::Variant{S}) where {S}
     len = length(x.ref) + sum(edit -> _lendiff(edit), _edits(x))
     resize!(seq, len % UInt)
