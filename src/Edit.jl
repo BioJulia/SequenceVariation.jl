@@ -14,7 +14,7 @@ struct Edit{S<:BioSequence,T<:BioSymbol}
     pos::UInt
 end
 
-Base.length(e::Edit) = length(mutation(e))
+Base.length(e::Edit) = length(_mutation(e))
 Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
 Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
 
@@ -42,17 +42,17 @@ function Base.parse(::Type{<:Edit{Se,Sy}}, s::Union{String,SubString{String}}) w
     end
 end
 
-mutation(e::Edit) = e.x
+_mutation(e::Edit) = e.x
 BioGenerics.leftposition(e::Edit) = e.pos
 function BioGenerics.rightposition(e::Edit)
-    if mutation(e) isa Substitution
+    if _mutation(e) isa Substitution
         return leftposition(e)
-    elseif mutation(e) isa Insertion
+    elseif _mutation(e) isa Insertion
         return leftposition(e) + 1
-    elseif mutation(e) isa Deletion
+    elseif _mutation(e) isa Deletion
         return leftposition(e) + length(e) - 1
     else
-        error("Unknown mutation type $(typeof(mutation(e)))")
+        error("Unknown mutation type $(typeof(_mutation(e)))")
     end
 end
 
