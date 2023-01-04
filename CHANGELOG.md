@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Code now follows [Blue style](https://github.com/invenia/BlueStyle) ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
 - :bomb: [BREAKING] Public and private API defined based on Blue style guidelines ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+- :bomb: [BREAKING] Renamed type `Variant` to `Haplotype` ([#20](https://github.com/BioJulia/SequenceVariation.jl/issues/20)/[#29](https://github.com/BioJulia/SequenceVariation.jl/pull/29))
 
 ### Removed
 
