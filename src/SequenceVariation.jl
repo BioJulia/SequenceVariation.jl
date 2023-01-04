@@ -45,7 +45,7 @@ struct Unsafe end
 struct Inapplicable end
 
 include("Edit.jl")
-include("Variant.jl")
+include("Haplotype.jl")
 include("Variation.jl")
 
 end # module
