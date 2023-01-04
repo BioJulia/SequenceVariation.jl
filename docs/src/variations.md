@@ -27,7 +27,7 @@ mutation(Variation(bovine_ins, "25ACA"))
 
 ## Extraction
 
-Sequence variations may also be extracted wholesale from a [`Variant`](@ref)
+Sequence variations may also be extracted wholesale from a [`Haplotype`](@ref)
 using the [`variations`](@ref) function.
 
 ```@setup call_variants
@@ -42,8 +42,8 @@ bos_ovis_alignment =
 bos_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), bovine);
 
-bos_ovis_variant = Variant(bos_ovis_alignment)
-bos_human_variant = Variant(bos_human_alignment)
+bos_ovis_variant = Haplotype(bos_ovis_alignment)
+bos_human_variant = Haplotype(bos_human_alignment)
 ```
 
 ```@repl call_variants

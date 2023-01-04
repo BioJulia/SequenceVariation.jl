@@ -1,9 +1,9 @@
 """
 Needs to be able to:
-* Given a sequence and a reference, create a `Variant` that unambiguously represents
+* Given a sequence and a reference, create a `Haplotype` that unambiguously represents
 the sequence
 
-* Given a `Variant` and a new reference, translate the variant to the new reference.
+* Given a `Haplotype` and a new reference, translate the variant to the new reference.
 
 * Given a mutation and a reference and a sequence, determine if the sequence has that
 mutation
@@ -34,12 +34,12 @@ const DNA_MODEL = BioAlignments.AffineGapScoreModel(EDNAFULL; gap_open=-25, gap_
 align(a::BioSequence, b::BioSequence) = pairalign(GlobalAlignment(), a, b, DNA_MODEL).aln
 seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
 seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
-var = Variant(align(seq1, seq2))
+var = Haplotype(align(seq1, seq2))
 
-@testset "VariantRoundtrip" begin
+@testset "HaplotypeRoundtrip" begin
     for v in variations(var)
         @test v in var
-        @test v in Variant(seq2, [v])
+        @test v in Haplotype(seq2, [v])
     end
 end
 
@@ -51,7 +51,7 @@ end
     read02 = AlignedSequence(mutseq[3:12], Alignment("10M", 1, 3))
     aln01 = PairwiseAlignment(read01, refseq)
     aln02 = PairwiseAlignment(read02, refseq)
-    @test Variant(aln01).edits == Variant(aln02).edits
+    @test Haplotype(aln01).edits == Haplotype(aln02).edits
 end
 
 @testset "VariationParsing" begin
@@ -72,7 +72,7 @@ end
 
     read = AlignedSequence(mutseq[1:10], Alignment("10M", 1, 1))
     aln = PairwiseAlignment(read, refseq)
-    var = Variant(aln)
+    var = Haplotype(aln)
 
     sub = Variation(refseq, "A4T")
     @test first(variations(var)) == sub
@@ -108,31 +108,31 @@ end
     @test altbases(Variation(dna"ATCGA", "1C")) == dna"CA"
 end
 
-@testset "SoftclipVariant" begin
+@testset "SoftclipHaplotype" begin
     refseq = dna"GATTACA"
     mutseq = dna"GATTACAAAA"
 
-    refvar = Variant(refseq, SequenceVariation.Edit{typeof(refseq),eltype(refseq)}[])
+    refvar = Haplotype(refseq, SequenceVariation.Edit{typeof(refseq),eltype(refseq)}[])
 
     # Test for ending soft clip
-    @test Variant(
+    @test Haplotype(
         PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S", 1, 1)), refseq)
     ) == refvar
 
     # Test for ending soft+hard clip
-    @test Variant(
+    @test Haplotype(
         PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3S2H", 1, 1)), refseq)
     ) == refvar
 
     # Test that ending insertions are still valid
     @test length(
-        Variant(
+        Haplotype(
             PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3I", 1, 1)), refseq)
         ).edits,
     ) == 1
 
     # Test that out-of-bounds bases are still caught
-    @test_throws BoundsError Variant(
+    @test_throws BoundsError Haplotype(
         PairwiseAlignment(AlignedSequence(mutseq, Alignment("7=3X", 1, 1)), refseq)
     )
 end
