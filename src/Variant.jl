@@ -124,7 +124,7 @@ function Variant(
     return Variant(ref, edits)
 end
 
-edits(v::Variant) = v.edits
+_edits(v::Variant) = v.edits
 reference(v::Variant) = v.ref
 Base.:(==)(x::Variant, y::Variant) = x.ref == y.ref && x.edits == y.edits
 
