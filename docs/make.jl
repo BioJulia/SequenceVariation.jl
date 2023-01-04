@@ -7,23 +7,25 @@ using Revise
 Revise.revise()
 
 makedocs(;
-    checkdocs = :exports,
-    linkcheck = true,
-    sitename = "SequenceVariation.jl",
-    format = Documenter.HTML(),
-    modules = [SequenceVariation],
-    pages = [
+    checkdocs=:exports,
+    linkcheck=true,
+    sitename="SequenceVariation.jl",
+    format=Documenter.HTML(),
+    modules=[SequenceVariation],
+    pages=[
         "Home" => "index.md",
         "Working with variants" => "variants.md",
         "Working with variations" => "variations.md",
         "Comparing variations" => "compare.md",
         "API Reference" => "api.md",
     ],
-    authors = replace(join(Pkg.TOML.parsefile("Project.toml")["authors"], ", "), r" <.*?>" => "" ) * ", The BioJulia Organisation, and other contributors."
+    authors=replace(
+        join(Pkg.TOML.parsefile("Project.toml")["authors"], ", "), r" <.*?>" => ""
+    ) * ", The BioJulia Organisation, and other contributors.",
 )
 
-deploydocs(
-    repo = "github.com/BioJulia/SequenceVariation.jl.git",
-    devbranch = "master",
-    push_preview = true,
+deploydocs(;
+    repo="github.com/BioJulia/SequenceVariation.jl.git",
+    devbranch="master",
+    push_preview=true,
 )
