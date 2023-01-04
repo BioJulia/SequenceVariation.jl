@@ -2,7 +2,7 @@
     Haplotype{S<:BioSequence,T<:BioSymbol}
 
 A set of variations within a given sequence that are all found together. Depending on the
-field, it might also be referred to as a "genotype," "haplotype," or "strain."
+field, it might also be referred to as a "genotype" or "strain."
 
 # Constructors
 
