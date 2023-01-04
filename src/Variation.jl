@@ -24,15 +24,15 @@ function Variation(ref::S, edit::AbstractString) where {S<:BioSequence}
 end
 
 function Variant(ref::S, vars::Vector{Variation{S,T}}) where {S<:BioSequence,T<:BioSymbol}
-    edits = edit.(vars)
+    edits = _edit.(vars)
     return Variant{S,T}(ref, edits)
 end
 
 reference(v::Variation) = v.ref
-edit(v::Variation) = v.edit
-mutation(v::Variation) = _mutation(edit(v))
-BioGenerics.leftposition(v::Variation) = leftposition(edit(v))
-BioGenerics.rightposition(v::Variation) = rightposition(edit(v))
+_edit(v::Variation) = v.edit
+mutation(v::Variation) = _mutation(_edit(v))
+BioGenerics.leftposition(v::Variation) = leftposition(_edit(v))
+BioGenerics.rightposition(v::Variation) = rightposition(_edit(v))
 Base.:(==)(x::Variation, y::Variation) = x.ref == y.ref && x.edit == y.edit
 Base.hash(x::Variation, h::UInt) = hash(Variation, hash((x.ref, x.edit), h))
 
