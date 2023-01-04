@@ -14,7 +14,7 @@ makedocs(;
     modules=[SequenceVariation],
     pages=[
         "Home" => "index.md",
-        "Working with variants" => "variants.md",
+        "Working with haplotypes" => "haplotypes.md",
         "Working with variations" => "variations.md",
         "Comparing variations" => "compare.md",
         "API Reference" => "api.md",
