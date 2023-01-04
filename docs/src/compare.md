@@ -4,7 +4,7 @@ CurrentModule = SequenceVariation
 
 # Comparing variations in sequences
 
-## Checking for variations in a known variant
+## Checking for variations in a known haplotype
 
 Looking for a known [`Variation`](@ref) within a [`Haplotype`](@ref) is
 efficiently accomplished using the `in` operator.
@@ -21,27 +21,27 @@ bos_ovis_alignment =
 bos_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), bovine);
 
-bos_ovis_variant = Haplotype(bos_ovis_alignment)
-bos_human_variant = Haplotype(bos_human_alignment)
+bos_ovis_haplotype = Haplotype(bos_ovis_alignment)
+bos_human_haplotype = Haplotype(bos_human_alignment)
 ```
 
 ```@example call_variants
 println("\tOvis aires\tHomo sapiens")
-for v in vcat(variations(bos_ovis_variant), variations(bos_human_variant))
-    is_sheep = v in bos_ovis_variant
-    is_human = v in bos_human_variant
+for v in vcat(variations(bos_ovis_haplotype), variations(bos_human_haplotype))
+    is_sheep = v in bos_ovis_haplotype
+    is_human = v in bos_human_haplotype
     println("$v\t$is_sheep\t\t$is_human")
 end
 ```
 
-## Constructing new variants based on other variations
+## Constructing new haplotypes based on other variations
 
-New variants can be constructed using variations. This might be useful to pool
-variations found on different reads or to filter variations from a variant
-that aren't validated by another variant.
+New haplotypes can be constructed using variations. This might be useful to pool
+variations found on different reads or to filter variations from a haplotype
+that aren't validated by another haplotype.
 
 ```@repl call_variants
-sheeple = vcat(variations(bos_ovis_variant), variations(bos_human_variant));
+sheeple = vcat(variations(bos_ovis_haplotype), variations(bos_human_haplotype));
 Haplotype(bovine, sheeple)
 reconstruct!(bovine, ans)
 ```

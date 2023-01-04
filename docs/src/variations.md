@@ -42,13 +42,13 @@ bos_ovis_alignment =
 bos_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), bovine);
 
-bos_ovis_variant = Haplotype(bos_ovis_alignment)
-bos_human_variant = Haplotype(bos_human_alignment)
+bos_ovis_haplotype = Haplotype(bos_ovis_alignment)
+bos_human_haplotype = Haplotype(bos_human_alignment)
 ```
 
 ```@repl call_variants
-variations(bos_ovis_variant)
-variations(bos_human_variant)
+variations(bos_ovis_haplotype)
+variations(bos_human_haplotype)
 ```
 
 ## Reference switching
@@ -59,8 +59,8 @@ alignment between the new and old references using the [`translate`](@ref).
 ```@repl call_variants
 ovis_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), ovine)
-human_variation = first(variations(bos_ovis_variant))
+human_variation = first(variations(bos_ovis_haplotype))
 reference(ans) == bovine
-SequenceVariation.translate(human_variation, ovis_human_alignment)
+SequenceVariation.translate(human_variation, ovis_human_haplotype)
 reference(ans) == bovine
 ```
