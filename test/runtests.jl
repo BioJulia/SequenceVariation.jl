@@ -69,6 +69,16 @@ end
     @test Variation(seq2, "A3T") < Variation(seq2, "T4A")
 end
 
+@testset "HaplotypeTranslation" begin
+    ref1 = seq2
+    ref2 = seq3
+    alt = seq1
+
+    @test all(
+        v -> v in Haplotype(align(alt, ref2)), variations(translate(var, align(ref2, ref1)))
+    )
+end
+
 @testset "VariationPosition" begin
     refseq = dna"ACAACTTTATCT"
     mutseq = dna"ACATCTTTATCT"
