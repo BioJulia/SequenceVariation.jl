@@ -24,16 +24,25 @@ TODO now:
 """
 
 using Aqua
-using BioAlignments
-using BioSequences
+using BioAlignments:
+    AffineGapScoreModel,
+    GlobalAlignment,
+    EDNAFULL,
+    pairalign,
+    Alignment,
+    AlignedSequence,
+    PairwiseAlignment
+using BioSequences: BioSequence, @dna_str, ungap!
+using BioSymbols: DNA_A
 using SequenceVariation
 using Test
 
-const DNA_MODEL = BioAlignments.AffineGapScoreModel(EDNAFULL; gap_open=-25, gap_extend=-2)
+const DNA_MODEL = AffineGapScoreModel(EDNAFULL; gap_open=-25, gap_extend=-2)
 
 align(a::BioSequence, b::BioSequence) = pairalign(GlobalAlignment(), a, b, DNA_MODEL).aln
 seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
 seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
+seq3 = ungap!(dna"-GATGCGTGT-AGCAACACTTATCGC-")
 var = Haplotype(align(seq1, seq2))
 
 @testset "EditSorting" begin
@@ -93,6 +102,49 @@ end
 
     sub = Variation(refseq, "A4T")
     @test first(variations(var)) == sub
+end
+
+@testset "VariationTranslation" begin
+    ref1 = seq2
+    ref2 = seq3
+    ref3 = copy(ref1)
+    ref3[1] = DNA_A
+    alt = seq1
+
+    ref2_on_ref1 = align(ref2, ref1)
+    alt_on_ref1 = align(alt, ref1)
+    ref1_on_alt = align(ref1, alt)
+    ref3_on_ref1 = align(ref3, ref1)
+
+    # Test insertion at position zero
+    @test translate(Variation(ref1, "0CAT"), ref2_on_ref1) ==
+        SequenceVariation.Inapplicable()
+    @test translate(Variation(ref1, "0CAT"), ref3_on_ref1) == Variation(ref3, "0CAT")
+
+    # Test substitution on deletion
+    @test isnothing(translate(Variation(ref1, "A17T"), ref1_on_alt))
+
+    # Test substitution to itself
+    @test isnothing(translate(Variation(ref1, "A23C"), ref2_on_ref1))
+
+    # Test simple substitution
+    @test translate(Variation(ref1, "T10A"), ref2_on_ref1) == Variation(ref2, "T9A")
+
+    # Test simple deletion
+    @test translate(Variation(ref1, "Δ17-18"), ref2_on_ref1) == Variation(ref2, "Δ16-17")
+
+    # Test deletion on deletion
+    @test isnothing(translate(Variation(ref1, "Δ17-17"), alt_on_ref1))
+
+    # Test simple insertion
+    @test translate(Variation(ref1, "6CAT"), ref2_on_ref1) == Variation(ref2, "5CAT")
+
+    # Test two insertions at the same position
+    @test translate(Variation(ref1, "10G"), alt_on_ref1) == SequenceVariation.Inapplicable()
+
+    # Test insertion on deletion
+    @test translate(Variation(ref1, "17CAT"), alt_on_ref1) ==
+        SequenceVariation.Inapplicable()
 end
 
 @testset "VariationBases" begin
