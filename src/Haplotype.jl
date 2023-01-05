@@ -162,11 +162,11 @@ reference(h::Haplotype) = h.ref
 Base.:(==)(x::Haplotype, y::Haplotype) = x.ref == y.ref && x.edits == y.edits
 
 """
-    reconstruct!(h::Haplotype)
+    reconstruct(h::Haplotype)
 
 Apply the edits in `h` to the reference sequence of `h` and return the mutated sequence
 """
-function reconstruct!(h::Haplotype)
+function reconstruct(h::Haplotype)
     len = length(reference(h)) + sum(edit -> _lendiff(edit), _edits(h))
     seq = copy(reference(h))
     resize!(seq, len % UInt)
