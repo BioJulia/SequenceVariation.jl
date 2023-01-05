@@ -22,6 +22,7 @@ Haplotype
 reference(::Haplotype)
 variations
 reconstruct
+translate(::Haplotype{S,T}, ::PairwiseAlignment{S,S}) where {S,T}
 ```
 
 ## Variations
@@ -30,7 +31,7 @@ reconstruct
 Variation
 reference(::Variation)
 mutation
-translate
+translate(::Variation{S,T}, ::PairwiseAlignment{S,S}) where {S,T}
 refbases
 altbases
 ```
