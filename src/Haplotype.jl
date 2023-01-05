@@ -162,21 +162,22 @@ reference(h::Haplotype) = h.ref
 Base.:(==)(x::Haplotype, y::Haplotype) = x.ref == y.ref && x.edits == y.edits
 
 """
-    reconstruct!(seq::S, x::Haplotype{S}) where {S}
+    reconstruct!(h::Haplotype)
 
-Apply the edits in `x` to `seq` and return the mutated sequence
+Apply the edits in `h` to the reference sequence of `h` and return the mutated sequence
 """
-function reconstruct!(seq::S, x::Haplotype{S}) where {S}
-    len = length(x.ref) + sum(edit -> _lendiff(edit), _edits(x))
+function reconstruct!(h::Haplotype)
+    len = length(reference(h)) + sum(edit -> _lendiff(edit), _edits(h))
+    seq = copy(reference(h))
     resize!(seq, len % UInt)
     refpos = seqpos = 1
-    for edit in x.edits
-        while refpos < edit.pos
-            seq[seqpos] = x.ref[refpos]
+    for edit in _edits(h)
+        while refpos < leftposition(edit)
+            seq[seqpos] = reference(h)[refpos]
             refpos += 1
             seqpos += 1
         end
-        editx = edit.x
+        editx = _mutation(edit)
         if editx isa Substitution
             seq[seqpos] = editx.x
             seqpos += 1
@@ -184,14 +185,14 @@ function reconstruct!(seq::S, x::Haplotype{S}) where {S}
         elseif editx isa Deletion
             refpos += editx.len
         elseif editx isa Insertion
-            for i in editx.x
+            for i in editx.seq
                 seq[seqpos] = i
                 seqpos += 1
             end
         end
     end
     while seqpos ≤ length(seq)
-        seq[seqpos] = x.ref[refpos]
+        seq[seqpos] = reference(h)[refpos]
         refpos += 1
         seqpos += 1
     end
