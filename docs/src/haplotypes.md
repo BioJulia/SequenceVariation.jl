@@ -31,11 +31,11 @@ bos_human_haplotype = Haplotype(bos_human_alignment)
 
 If the alternate sequence of a haplotype is no longer available (as is often the
 case when calling variants from alignment files), then the sequence can be
-retrieved using the [`reconstruct!`](@ref) function.
+retrieved using the [`reconstruct`](@ref) function.
 
 ```@repl call_variants
 human2 = copy(bovine);
-reconstruct!(human2, bos_human_haplotype)
+reconstruct(human2, bos_human_haplotype)
 human2 == bovine
 human2 == human
 ```

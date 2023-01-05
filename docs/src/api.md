@@ -21,7 +21,7 @@ Insertion
 Haplotype
 reference(::Haplotype)
 variations
-reconstruct!
+reconstruct
 ```
 
 ## Variations
