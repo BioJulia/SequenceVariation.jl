@@ -43,6 +43,10 @@ var = Haplotype(align(seq1, seq2))
     end
 end
 
+@testset "HaplotypeReconstruction" begin
+    @test reconstruct(var) == seq1
+end
+
 @testset "VariationPosition" begin
     refseq = dna"ACAACTTTATCT"
     mutseq = dna"ACATCTTTATCT"
