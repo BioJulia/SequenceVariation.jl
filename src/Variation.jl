@@ -138,7 +138,7 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
     if iszero(pos)
         (s, r), _ = iterate(aln)
         (isgap(s) | isgap(r)) && return Inapplicable()
-        return Variation{S,T}(seq, Edit{S,T}(Insertion(var.edit.x), 0))
+        return Variation{S,T}(seq, Edit{S,T}(Insertion(kind.seq), 0))
     end
 
     (seqpos, op) = BA.ref2seq(aln, pos)
@@ -153,18 +153,19 @@ function translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
         # If it's a deletion, return nothing if the deleted part is already missing
         # from the new reference.
         (stop, op2) = BA.ref2seq(aln, pos + length(kind) - 1)
-        start = seqpos + op == BA.OP_DELETE
-        start < stop && return nothing
-        edit = Edit{S,T}(Deletion(stop - start + 1), start)
+        start = seqpos + (op == BA.OP_DELETE)
+        del_len = stop - start + 1
+        del_len > 0 || return nothing
+        edit = Edit{S,T}(Deletion(del_len), start)
         return Variation{S,T}(seq, edit, Unsafe())
     else
         # If it maps directly to a symbol, just insert
         if op in (BA.OP_MATCH, BA.OP_SEQ_MATCH, BA.OP_SEQ_MISMATCH)
             # This happens if there is already an insertion at the position
-            if pos != lastindex(ref) && first(ref2seq(aln, pos + 1)) != seqpos + 1
+            if pos != lastindex(ref) && first(BA.ref2seq(aln, pos + 1)) != seqpos + 1
                 return Inapplicable()
             else
-                edit = Edit{S,T}(Insertion(var.edit.x), seqpos)
+                edit = Edit{S,T}(Insertion(mutation(var).seq), seqpos)
                 return Variation{S,T}(seq, edit, Unsafe())
             end
             # Alternatively, it can map to a deletion. In that case, it become really
