@@ -198,3 +198,23 @@ function reconstruct(h::Haplotype)
     end
     return seq
 end
+
+"""
+    translate(hap::Haplotype{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
+
+Convert the variations in `hap` to a new reference sequence based upon `aln`. The alignment
+rules follow the conventions of
+[`translate(::Variation, PairwiseAlignment)`](@ref translate(::Variation{S,T}, ::PairwiseAlignment{S,S}) where {S,T}).
+Indels at the beginning or end may not be preserved. Returns a new
+[`Haplotype`](@ref)
+"""
+function translate(hap::Haplotype{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
+    vars = variations(hap)
+    new_ref = BA.sequence(aln)
+    translated_vars = Variation{S,T}[]
+    for v in vars
+        new_v = translate(v, aln)
+        isnothing(new_v) || push!(translated_vars, new_v)
+    end
+    return Haplotype(new_ref, translated_vars)
+end
