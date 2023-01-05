@@ -54,13 +54,15 @@ variations(bos_human_haplotype)
 ## Reference switching
 
 An individual variation can be mapped to a new reference sequence given an
-alignment between the new and old references using the [`translate`](@ref).
+alignment between the new and old references using the
+[`translate`](@ref translate(::Variation{S,T}, ::PairwiseAlignment{S,S}) where {S,T})
+function.
 
 ```@repl call_variants
 ovis_human_alignment =
     PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), ovine)
 human_variation = first(variations(bos_ovis_haplotype))
 reference(ans) == bovine
-SequenceVariation.translate(human_variation, ovis_human_haplotype)
+SequenceVariation.translate(human_variation, ovis_human_alignment)
 reference(ans) == bovine
 ```
