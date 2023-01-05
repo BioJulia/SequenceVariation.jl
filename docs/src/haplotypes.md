@@ -38,3 +38,18 @@ human2 = reconstruct(bos_human_haplotype)
 human2 == bovine
 human2 == human
 ```
+
+## Reference switching
+
+All variations within a haplotype can be mapped to a new reference sequence
+given an alignment between the new and old references using the
+[`translate`](@ref translate(::Haplotype{S,T}, ::PairwiseAlignment{S,S}) where {S,T})
+function. This could be useful if variants were called against a reference
+sequence for the entire species, but need to be analyzed as variants of a
+subtype later.
+
+```@repl call_variants
+ovis_human_alignment =
+    PairwiseAlignment(AlignedSequence(human, Alignment("32M", 1, 1)), ovine)
+SequenceVariation.translate(bos_ovis_haplotype, ovis_human_alignment)
+```
