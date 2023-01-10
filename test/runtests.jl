@@ -56,6 +56,10 @@ end
     @test reconstruct(var) == seq1
 end
 
+@testset "VariationSorting" begin
+    @test Variation(seq2, "A3T") < Variation(seq2, "T4A")
+end
+
 @testset "VariationPosition" begin
     refseq = dna"ACAACTTTATCT"
     mutseq = dna"ACATCTTTATCT"
