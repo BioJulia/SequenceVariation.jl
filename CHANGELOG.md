@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Tutorial-type documentation ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
+- `Base.isless` implementation for `Edit` and `Variation` ([#31](https://github.com/BioJulia/SequenceVariation.jl/pull/31))
 
 ### Changed
 
