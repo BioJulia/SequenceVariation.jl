@@ -36,6 +36,15 @@ seq1 = ungap!(dna"--ATGCGTGTTAGCAAC--TTATCGCG")
 seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
 var = Haplotype(align(seq1, seq2))
 
+@testset "EditSorting" begin
+    S = typeof(seq1)
+    T = eltype(seq1)
+    @test SequenceVariation.Edit{S,T}(Deletion(1), 1) <
+        SequenceVariation.Edit{S,T}(Deletion(1), 2)
+    @test SequenceVariation.Edit{S,T}(Deletion(1), 1) <
+        SequenceVariation.Edit{S,T}(Deletion(2), 1)
+end
+
 @testset "HaplotypeRoundtrip" begin
     for v in variations(var)
         @test v in var
