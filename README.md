@@ -5,6 +5,7 @@
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/BioJulia/SequenceVariation.jl/blob/master/LICENSE)
 [![Stable documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://biojulia.github.io/SequenceVariation.jl/stable)
 [![Latest documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://biojulia.github.io/SequenceVariation.jl/dev/)
+[![DOI](https://zenodo.org/badge/343847382.svg)](https://zenodo.org/badge/latestdoi/343847382)
 
 > This project follows the [semver](https://semver.org) _pro forma_ and uses the [OneFlow branching model](https://www.endoflineblog.com/oneflow-a-git-branching-model-and-workflow).
 
