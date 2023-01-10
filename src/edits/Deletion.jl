@@ -15,7 +15,7 @@ end
 Deletion(x::Integer) = Deletion(convert(UInt, x))
 
 Base.length(x::Deletion) = Int(x.len)
-Base.:(==)(x::Substitution, y::Substitution) = length(x) == length(y)
+Base.:(==)(x::Deletion, y::Deletion) = length(x) == length(y)
 Base.hash(x::Deletion, h::UInt) = hash(Deletion, hash(x.len, h))
 
 function _refbases(d::Deletion, reference::S, pos::UInt) where {S<:BioSequence}
