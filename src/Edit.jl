@@ -17,6 +17,13 @@ end
 Base.length(e::Edit) = length(_mutation(e))
 Base.:(==)(e1::Edit, e2::Edit) = e1.pos == e2.pos && e1.x == e2.x
 Base.hash(x::Edit, h::UInt) = hash(Edit, hash((x.x, x.pos), h))
+function Base.isless(x::Edit, y::Edit)
+    if leftposition(x) == leftposition(y)
+        return length(x) < length(y)
+    end
+
+    return leftposition(x) < leftposition(y)
+end
 
 function Base.parse(::Type{T}, s::AbstractString) where {T<:Edit{Se,Sy}} where {Se,Sy}
     return parse(T, String(s))
