@@ -24,7 +24,7 @@ add SequenceVariation
 
 ## Testing
 
-SequenceVariation is tested against Julia `1.X` on Linux, OS X, and Windows.
+SequenceVariation is tested against Julia `1.6` (LTS), `1.X` (release) and nightly on Linux.
 
 **Latest build status:**
 
