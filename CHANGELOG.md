@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `translate` functionality for `Haplotype`s ([#31](https://github.com/BioJulia/SequenceVariation.jl/pull/31))
+
 ## [0.2.0] - 2023-01-10
 
 ### Added
 
 - Tutorial-type documentation ([#28](https://github.com/BioJulia/SequenceVariation.jl/pull/28))
-- `Base.isless` implementation for `Edit` and `Variation` ([#31](https://github.com/BioJulia/SequenceVariation.jl/pull/31))
+- `Base.isless` implementation for `Edit` and `Variation` ([#32](https://github.com/BioJulia/SequenceVariation.jl/pull/32))
 
 ### Changed
 
