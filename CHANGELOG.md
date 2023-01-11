@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `translate` functionality for `Haplotype`s ([#31](https://github.com/BioJulia/SequenceVariation.jl/pull/31))
+- More informative errors when constructing invalid `Haplotype`s ([#34](https://github.com/BioJulia/SequenceVariation.jl/pull/34))
 
 ## [0.2.0] - 2023-01-10
 
