@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2023-01-11
+
 ### Added
 
 - `translate` functionality for `Haplotype`s ([#31](https://github.com/BioJulia/SequenceVariation.jl/pull/31))
@@ -68,7 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Variant` constructor to automatically detect mutations from a `BioAlignments.PairwiseAlignment`
 - Methods to get reference and alternate bases from a `Variation`
 
-[unreleased]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/BioJulia/SequenceVariation.jl/compare/v0.1.2...v0.1.3
