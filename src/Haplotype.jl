@@ -29,7 +29,8 @@ function Haplotype{S,T}(
 ) where {S<:BioSequence,T<:BioSymbol}
     sort!(edits; by=x -> x.pos)
     result = Haplotype{S,T}(ref, edits, Unsafe())
-    _is_valid(result) || error("TODO") # report what kind of error message?
+    valid, message = _is_valid(result)
+    valid || error(message)
     return result
 end
 
@@ -62,11 +63,12 @@ function _is_valid(h::Haplotype)
         op = edit.x
         # Sanity check: for this to be a valid variant, it must be comprised of valid
         # variations
-        _is_valid(Variation(h.ref, edit)) || return false
+        _is_valid(Variation(h.ref, edit)) || return (false, "Invalid Variation")
 
         # For substitutions we simply do not allow another modification of the same base
         if op isa Substitution
-            pos in valid_positions || return false
+            pos in valid_positions ||
+                return (false, "Multiple modifications at same position")
             valid_positions = (first(valid_positions) + 1):last(valid_positions)
             last_was_insert = false
             # Insertions affect 0 reference bases, so it does not modify the valid positions
@@ -75,18 +77,18 @@ function _is_valid(h::Haplotype)
         elseif op isa Insertion
             pos in
             ((first(valid_positions) - 1 + last_was_insert):(last(valid_positions) + 1)) ||
-                return false
+                return (false, "Multiple insertions at same position")
             last_was_insert = true
             # Deletions obviously invalidate the reference bases that are deleted.
         elseif op isa Deletion
             len = length(op)
             pos in (first(valid_positions):(last(valid_positions) - len + 1)) ||
-                return false
+                return (false, "Deletion out of range")
             valid_positions = (first(valid_positions) + len):last(valid_positions)
             last_was_insert = false
         end
     end
-    return true
+    return (true, "")
 end
 
 function Haplotype(
