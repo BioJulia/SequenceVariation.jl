@@ -54,6 +54,41 @@ var = Haplotype(align(seq1, seq2))
         SequenceVariation.Edit{S,T}(Deletion(2), 1)
 end
 
+@testset "HaplotypeValidation" begin
+    # Test that substitutions cannot share the same position
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "T2A"), Variation(seq2, "T2C")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "G2A"), Variation(seq2, "G2T")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "G26A"), Variation(seq2, "G26T")]
+    )
+
+    # Test that insertions cannot share the same position
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "0AAA"), Variation(seq2, "0TTT")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "2AAA"), Variation(seq2, "2TTT")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "26AAA"), Variation(seq2, "26TTT")]
+    )
+
+    # Test that deletions invalidate further operations within the deleted positions
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "Δ2-2"), Variation(seq2, "G2A")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "G2A"), Variation(seq2, "Δ2-2")]
+    )
+    @test_throws ErrorException Haplotype(
+        seq2, [Variation(seq2, "Δ2-6"), Variation(seq2, "Δ3-5")]
+    )
+end
+
 @testset "HaplotypeRoundtrip" begin
     for v in variations(var)
         @test v in var
