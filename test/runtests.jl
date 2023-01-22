@@ -45,6 +45,9 @@ seq2 = ungap!(dna"TGATGCGTGT-AGCAACACTTATAGCG")
 seq3 = ungap!(dna"-GATGCGTGT-AGCAACACTTATCGC-")
 var = Haplotype(align(seq1, seq2))
 
+const SEQ = typeof(seq1)
+const BSE = eltype(seq1)
+
 @testset "EditSorting" begin
     S = typeof(seq1)
     T = eltype(seq1)
@@ -55,6 +58,11 @@ var = Haplotype(align(seq1, seq2))
 end
 
 @testset "HaplotypeValidation" begin
+    # Test that we can't use an empty reference
+    @test_throws ErrorException Haplotype(
+        dna"", [SequenceVariation.Edit{SEQ,BSE}(Insertion{SEQ}(dna"A"), 0)]
+    )
+
     # Test that substitutions cannot share the same position
     @test_throws ErrorException Haplotype(
         seq2, [Variation(seq2, "T2A"), Variation(seq2, "T2C")]
@@ -86,6 +94,21 @@ end
     )
     @test_throws ErrorException Haplotype(
         seq2, [Variation(seq2, "Δ2-6"), Variation(seq2, "Δ3-5")]
+    )
+
+    # Test that a complicated (but valid) Haplotype still checks out
+    @test first(
+        SequenceVariation._is_valid(
+            Haplotype(
+                seq2,
+                [
+                    Variation(seq2, "0AAA"),
+                    Variation(seq2, "T2A"),
+                    Variation(seq2, "Δ5-8"),
+                    Variation(seq2, "G26A"),
+                ],
+            ),
+        ),
     )
 end
 
