@@ -49,15 +49,27 @@ function Base.show(io::IO, x::Haplotype)
 end
 
 """
-    _is_valid(h::Haplotype)
+    _is_valid(h::Haplotype{S,T}) where {S,T}
 
 Validate `h`. `h` is invalid if any of its operations are out of bounds, or the same
 position is affected by multiple edits.
 """
-function _is_valid(h::Haplotype)
+function _is_valid(h::Haplotype{S,T}) where {S,T}
+    # Empty references mean we have nothing to compare to
     isempty(reference(h)) && return (false, "Empty reference")
-    valid_positions = BitVector(ones(length(reference(h))))
-    insertion_bases = Integer[]
+    # Empty edits simple means that this is the reference haplotype
+    isempty(_edits(h)) && return (true, "")
+
+    # It is valid for edits to exist within the space between the first edit and the entire
+    # length of the reference. The reason we can't use simply use the length of the reference
+    # is because we couldn't tell if a starting insertion overlapped with a future edit that
+    # way. Also, force the range to be a signed integer to avoid subtraction overflow errors
+    # when there is a starting insertion.
+    valid_positions = UnitRange{Int128}(
+        leftposition(first(_edits(h))), UInt64(length(reference(h)))
+    )
+    # Placeholder flag for iterating through multiple insertions at the same position
+    last_was_insert = false
 
     for edit in _edits(h)
         pos = leftposition(edit)
@@ -65,26 +77,35 @@ function _is_valid(h::Haplotype)
 
         # Sanity check: for this to be a valid variant, it must be comprised of valid
         # variations
-        _is_valid(Variation(reference(h), edit)) || return (false, "Invalid Variation")
+        _is_valid(Variation{S,T}(h.ref, edit, Unsafe())) ||
+            return (false, "Invalid Variation")
 
         if op isa Substitution
             # For substitutions we simply do not allow another modification of the same base
-            valid_positions[pos] ||
+            pos in valid_positions ||
                 return (false, "Multiple modifications at same position")
-            valid_positions[pos] = false
+
+            # Invalidate this base's and all previous positions. This only works because
+            # we're working with a pre-sorted list of edits.
+            valid_positions = (pos + 1):last(valid_positions)
+            last_was_insert = false
         elseif op isa Insertion
             # Insertions affect 0 reference bases, so it does not modify the valid positions
             # for next op. However, we cannot have two insertions at the same position, because
             # then the order of them is ambiguous
-            pos in insertion_bases && return (false, "Multiple insertions at same position")
-            push!(insertion_bases, pos)
+            pos in (
+                (first(valid_positions) - 1 + 2 * last_was_insert):(last(valid_positions) + 1)
+            ) || return (false, "Multiple insertions at same position")
+
+            last_was_insert = true
         elseif op isa Deletion
             # Deletions obviously invalidate the reference bases that are deleted.
-            for i in pos:(pos + length(op))
-                checkbounds(Bool, valid_positions, i) || return (false, "Deletion out of range")
-                valid_positions[i] || return (false, "Modifications in a deleted region")
-                valid_positions[i] = false
-            end
+            len = length(op)
+            pos in (first(valid_positions):(last(valid_positions) - len + 1)) ||
+                return (false, "Deletion out of range")
+
+            valid_positions = (first(valid_positions) + len):last(valid_positions)
+            last_was_insert = false
         end
     end
     return (true, "")
