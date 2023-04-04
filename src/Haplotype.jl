@@ -222,6 +222,35 @@ function reconstruct(h::Haplotype)
 end
 
 """
+    cigar(hap::Haplotype{S,T}) where {S,T}
+
+Constructs a CIGAR string representing the alignment of the sequence of `hap` to its
+reference.
+"""
+function BioAlignments.cigar(hap::Haplotype{S,T}) where {S,T}
+    cigar_string = String[]
+
+    mismatch_vars = filter(var -> !isa(mutation(var), Substitution), variations(hap))
+
+    length(mismatch_vars) > 0 || return "$(length(reference(hap)))M"
+
+    lastvar = first(mismatch_vars)
+
+    leftposition(lastvar) > 1 && push!(cigar_string, "$(leftposition(lastvar))M")
+
+    for var in mismatch_vars
+        push!(cigar_string, _cigar_between(lastvar, var))
+        push!(cigar_string, _cigar(var))
+        lastvar = var
+    end #for
+
+    remaining_bases = length(reference(hap)) - rightposition(lastvar)
+    remaining_bases > 0 && push!(cigar_string, "$(remaining_bases)M")
+
+    return join(cigar_string, "")
+end
+
+"""
     translate(hap::Haplotype{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 
 Convert the variations in `hap` to a new reference sequence based upon `aln`. The alignment
