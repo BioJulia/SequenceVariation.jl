@@ -32,6 +32,7 @@ using BioAlignments:
     Alignment,
     AlignedSequence,
     PairwiseAlignment,
+    alignment,
     cigar
 using BioSequences: BioSequence, @dna_str, ungap!
 using BioSymbols: DNA_A
@@ -145,6 +146,12 @@ end
 
     @test cigar(reference_genotype) == "26M"
     @test cigar(genotype) == "2D7M1I7M2D8M"
+end
+
+@testset "HaplotypeAlignment" begin
+    # This test is broken until we get a way to remove sequence info from alignments
+    # See: https://github.com/BioJulia/BioAlignments.jl/issues/90
+    @test_broken alignment(var) == align(seq1, seq2)
 end
 
 @testset "HaplotypeTranslation" begin
