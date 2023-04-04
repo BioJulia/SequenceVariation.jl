@@ -251,6 +251,17 @@ function BioAlignments.cigar(hap::Haplotype{S,T}) where {S,T}
 end
 
 """
+    alignment(hap::Haplotype)
+
+Gets a `PairwiseAlignment` of the mutated sequence of `hap` mapped to its refernce sequence
+"""
+function BioAlignments.alignment(hap::Haplotype)
+    return PairwiseAlignment(
+        AlignedSequence(reconstruct(hap), Alignment(cigar(hap))), reference(hap)
+    )
+end
+
+"""
     translate(hap::Haplotype{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 
 Convert the variations in `hap` to a new reference sequence based upon `aln`. The alignment
