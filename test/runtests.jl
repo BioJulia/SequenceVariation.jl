@@ -31,7 +31,9 @@ using BioAlignments:
     pairalign,
     Alignment,
     AlignedSequence,
-    PairwiseAlignment
+    PairwiseAlignment,
+    alignment,
+    cigar
 using BioSequences: BioSequence, @dna_str, ungap!
 using BioSymbols: DNA_A
 using SequenceVariation
@@ -125,6 +127,31 @@ end
 
 @testset "VariationSorting" begin
     @test Variation(seq2, "A3T") < Variation(seq2, "T4A")
+end
+
+@testset "CIGAR" begin
+    reference = dna"TGATGCGTGTAGCAACACTTATAGCG"
+    reference_genotype = Haplotype(
+        reference, Variation{typeof(reference),eltype(reference)}[]
+    )
+    genotype = Haplotype(
+        reference,
+        [
+            Variation(reference, "Δ1-2"),
+            Variation(reference, "10T"),
+            Variation(reference, "Δ17-18"),
+            Variation(reference, "A23C"),
+        ],
+    )
+
+    @test cigar(reference_genotype) == "26M"
+    @test cigar(genotype) == "2D7M1I7M2D8M"
+end
+
+@testset "HaplotypeAlignment" begin
+    # This test is broken until we get a way to remove sequence info from alignments
+    # See: https://github.com/BioJulia/BioAlignments.jl/issues/90
+    @test_broken alignment(var) == align(seq1, seq2)
 end
 
 @testset "HaplotypeTranslation" begin

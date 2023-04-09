@@ -121,6 +121,41 @@ function Base.in(v::Variation, var::Haplotype)
 end
 
 """
+    _cigar(var::Variation{S,T}) where {S,T}
+
+Returns a CIGAR operation for `var`. Only supports insertions and deletions.
+
+See also [`_cigar_between`](@ref)
+"""
+function _cigar(var::Variation{S,T}) where {S,T}
+    mut = mutation(var)
+    mut isa Union{Deletion,Insertion} ||
+        throw(ArgumentError("var must be an Insertion or Deletion"))
+    cigar_letter = mut isa Deletion ? 'D' : 'I'
+    return string(length(mut), cigar_letter)
+end
+
+"""
+    _cigar_between(x::Variation{S,T}, y::Variation{S,T}) where {S,T}
+
+Returns a CIGAR operation for the (assumed) matching bases between `x` and `y`.
+
+See also [`_cigar`](@ref)
+"""
+function _cigar_between(x::Variation{S,T}, y::Variation{S,T}) where {S,T}
+    x == y && return ""
+    match_length = leftposition(y) - rightposition(x)
+    if mutation(y) isa Insertion
+        match_length -= 1
+    end
+    if mutation(y) isa Deletion
+        match_length += 1
+    end
+    match_length > 0 || return ""
+    return "$(match_length)M"
+end
+
+"""
     translate(var::Variation{S,T}, aln::PairwiseAlignment{S,S}) where {S,T}
 
 Convert the difference in `var` to a new reference sequence based upon `aln`. `aln` is the

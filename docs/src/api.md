@@ -15,13 +15,15 @@ Deletion
 Insertion
 ```
 
-## Variants
+## Haplotypes
 
 ```@docs
 Haplotype
 reference(::Haplotype)
 variations
 reconstruct
+BioAlignments.alignment
+BioAlignment.cigar
 translate(::Haplotype{S,T}, ::PairwiseAlignment{S,S}) where {S,T}
 ```
 

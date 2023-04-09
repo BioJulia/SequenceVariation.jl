@@ -20,7 +20,15 @@ TODO now:
 * Add tests
 """
 
-using BioAlignments: BioAlignments, PairwiseAlignment, OP_SOFT_CLIP, sequence
+using BioAlignments:
+    BioAlignments,
+    Alignment,
+    AlignedSequence,
+    PairwiseAlignment,
+    OP_SOFT_CLIP,
+    alignment,
+    cigar,
+    sequence
 using BioGenerics: BioGenerics, leftposition, rightposition
 using BioSequences: BioSequences, BioSequence, NucleotideSeq, LongSequence, isgap
 using BioSymbols: BioSymbol

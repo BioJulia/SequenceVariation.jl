@@ -39,6 +39,24 @@ human2 == bovine
 human2 == human
 ```
 
+## Alignment reconstruction
+
+Just like [Sequence reconstruction](@ref), alignments can also be reconstructed
+from `Haplotype`s using the extension of the [`BioAlignments.alignment`](@ref)
+function.
+
+```@repl call_variants
+human_alignment = alignment(bos_human_haplotype)
+human_alignment == bos_human_alignment
+```
+
+Alternatively, you can get the information in CIGAR format using the
+extension of the [`BioAlignments.cigar`](@ref) function.
+
+```@repl call_variants
+cigar(bos_human_haplotype)
+```
+
 ## Reference switching
 
 All variations within a haplotype can be mapped to a new reference sequence

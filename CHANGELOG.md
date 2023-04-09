@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `alignment` and `cigar` getters for `Haplotype`s ([#39](https://github.com/BioJulia/SequenceVariation.jl/issues/39)/[#42](https://github.com/BioJulia/SequenceVariation.jl/pull/42))
+
 ## [0.2.2] - 2023-01-28
 
 ### Fixed
