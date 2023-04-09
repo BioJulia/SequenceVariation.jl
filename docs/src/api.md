@@ -15,7 +15,7 @@ Deletion
 Insertion
 ```
 
-## Variants
+## Haplotypes
 
 ```@docs
 Haplotype
